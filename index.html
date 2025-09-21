@@ -6,17 +6,29 @@
   <title>Lanzador de dados – DyD</title>
   <style>
     :root{
-      --bg:#0f172a; --panel:#0b1220ee; --card:#0f172acc; --text:#e5e7eb; --muted:#94a3b8; --accent:#38bdf8; --ok:#22c55e;
+      --bg:#0f172a; --panel:#0b1220ee; --card:#0f172acc; --text:#e5e7eb; --muted:#94a3b8; --accent:#38bdf8; --ok:#22c55e; --warn:#f59e0b; --danger:#ef4444;
     }
     html,body{height:100%;margin:0;background:var(--bg);color:var(--text);font-family:system-ui,-apple-system,Segoe UI,Roboto,Ubuntu,Cantarell,Noto Sans,sans-serif}
     .app{min-height:100%;display:flex;flex-direction:column}
     header{position:sticky;top:0;z-index:10;background:var(--panel);backdrop-filter:blur(8px);border-bottom:1px solid #ffffff22}
-    .hdr{max-width:980px;margin:0 auto;padding:14px 16px;display:flex;gap:12px;align-items:center;justify-content:space-between}
+    .hdr{max-width:1100px;margin:0 auto;padding:12px 14px;display:flex;gap:12px;align-items:center;justify-content:space-between}
     .title{font-weight:800;letter-spacing:.3px}
     .subtitle{color:var(--muted);font-size:.92rem}
-    main{flex:1}
-    .wrap{max-width:980px;margin:0 auto;padding:16px}
+    .hud{max-width:1100px;margin:0 auto;padding:8px 14px 12px;display:grid;grid-template-columns:1fr auto;gap:10px;align-items:center}
+    .controls{display:flex;flex-wrap:wrap;gap:8px}
+    .seg{display:inline-flex;border:1px solid #ffffff33;border-radius:10px;overflow:hidden}
+    .seg button{background:#111827;color:#e5e7eb;border:none;padding:8px 10px;cursor:pointer}
+    .seg button.active{background:var(--accent);color:#0b1220;font-weight:800}
+    .field{display:inline-flex;align-items:center;gap:6px;border:1px solid #ffffff33;border-radius:10px;padding:2px 6px;background:#0b1220}
+    .field input[type="text"], .field input[type="number"]{background:transparent;border:none;color:#e5e7eb;outline:none;width:120px}
+    .step{display:inline-flex;border:1px solid #ffffff33;border-radius:10px;overflow:hidden}
+    .step button{background:#111827;color:#e5e7eb;border:none;width:34px;height:34px;font-weight:800;cursor:pointer}
+    .step .val{min-width:34px;text-align:center;display:grid;place-items:center;font-weight:800;padding:0 6px}
+    .ghost{appearance:none;border:1px solid #ffffff33;background:transparent;color:#e5e7eb;border-radius:10px;padding:8px 10px;cursor:pointer}
+    .primary{appearance:none;border:none;background:var(--accent);color:#0b1220;font-weight:800;padding:10px 12px;border-radius:10px;cursor:pointer}
 
+    main{flex:1}
+    .wrap{max-width:1100px;margin:0 auto;padding:14px}
     .grid{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:12px}
     @media(min-width:760px){.grid{grid-template-columns:repeat(4,minmax(0,1fr));}}
 
@@ -31,24 +43,25 @@
     .row{display:flex;justify-content:space-between;align-items:center}
     .label{font-weight:700}
     .muted{color:var(--muted);font-size:.9rem}
-
     .qty{display:flex;align-items:center;gap:8px}
     .qty button{appearance:none;border:none;background:#111827;color:#e5e7eb;border:1px solid #ffffff22;width:38px;height:38px;border-radius:12px;font-size:18px;font-weight:800;cursor:pointer}
     .qty .count{min-width:28px;text-align:center;font-weight:800}
 
     .footerBar{position:sticky;bottom:0;background:var(--panel);backdrop-filter:blur(8px);border-top:1px solid #ffffff22}
-    .footerWrap{max-width:980px;margin:0 auto;padding:12px 16px;display:flex;gap:12px;align-items:center;justify-content:space-between}
+    .footerWrap{max-width:1100px;margin:0 auto;padding:10px 14px;display:flex;gap:10px;align-items:center;justify-content:space-between}
     .summary{color:var(--muted)}
     .btnPrimary{appearance:none;border:none;background:var(--accent);color:#0b1220;font-weight:800;padding:12px 16px;border-radius:14px;box-shadow:0 10px 24px #0008;cursor:pointer}
     .btnPrimary:disabled{opacity:.5;cursor:not-allowed}
 
-    /* Modal */
+    /* Modales */
     .modal{position:fixed;inset:0;background:#0009;display:none;align-items:center;justify-content:center;z-index:40}
     .modal.show{display:flex}
-    .modalCard{background:var(--panel);border:1px solid #ffffff22;border-radius:16px;padding:16px 14px;min-width:min(92vw,520px)}
-    .modalHead{display:flex;justify-content:space-between;align-items:center;margin-bottom:8px}
+    .modalCard{background:var(--panel);border:1px solid #ffffff22;border-radius:16px;padding:16px 14px;min-width:min(92vw,680px);max-height:80vh;overflow:auto}
+    .modalHead{display:flex;justify-content:space-between;align-items:center;margin-bottom:8px;gap:12px}
     .total{font-size:28px;font-weight:900;color:#fff}
     .badge{background:#16a34a22;color:#86efac;border:1px solid #16a34a55;padding:4px 8px;border-radius:999px;font-weight:700}
+    .resultList{margin-top:8px;color:#e5e7eb}
+    .resultList .line{display:flex;justify-content:space-between;gap:8px;padding:6px 0;border-bottom:1px dashed #ffffff22}
     .modalActions{display:flex;justify-content:flex-end;gap:10px;margin-top:12px}
     .btn{appearance:none;border:none;border-radius:12px;padding:10px 12px;cursor:pointer}
     .btnGhost{background:transparent;border:1px solid #ffffff44;color:#e5e7eb}
@@ -61,9 +74,44 @@
       <div class="hdr">
         <div>
           <div class="title">Lanzador de dados – Dungeons & Dragons</div>
-          <div class="subtitle">Sprites simples (1 PNG + 1 animación por dado). Resultado solo en el modal.</div>
+          <div class="subtitle">Presets · modificadores · ventaja/desventaja · historial</div>
         </div>
         <div class="muted" id="selCounter">0 seleccionados</div>
+      </div>
+      <!-- HUD superior -->
+      <div class="hud">
+        <div class="controls">
+          <!-- Presets -->
+          <div class="field">
+            <span style="opacity:.7">Preset</span>
+            <select id="presetSelect" style="background:transparent;color:#e5e7eb;border:none;outline:none">
+              <option value="">(ninguno)</option>
+            </select>
+            <button class="ghost" id="applyPreset">Aplicar</button>
+          </div>
+          <div class="field">
+            <input id="presetName" type="text" placeholder="Guardar como…" />
+            <button class="primary" id="savePreset">Guardar</button>
+          </div>
+          <!-- Modificador -->
+          <div class="field">
+            <span style="opacity:.7">Mod</span>
+            <div class="step">
+              <button id="modDec">−</button>
+              <div class="val" id="modVal">0</div>
+              <button id="modInc">+</button>
+            </div>
+          </div>
+          <!-- Ventaja / Desventaja -->
+          <div class="seg" id="advGroup">
+            <button data-mode="normal" class="active">Normal</button>
+            <button data-mode="adv">Ventaja</button>
+            <button data-mode="dis">Desventaja</button>
+          </div>
+        </div>
+        <div>
+          <button class="ghost" id="openHistory">Historial</button>
+        </div>
       </div>
     </header>
 
@@ -81,13 +129,14 @@
     </div>
   </div>
 
-  <!-- Modal -->
+  <!-- Modal resultado -->
   <div class="modal" id="modal">
     <div class="modalCard">
       <div class="modalHead">
         <div class="total" id="total">Total: 0</div>
         <div class="badge" id="badge"></div>
       </div>
+      <div class="resultList" id="resultList"></div>
       <div class="modalActions">
         <button class="btn btnGhost" id="btnClose">Cerrar</button>
         <button class="btn btnOk" id="btnAgain">Lanzar de nuevo</button>
@@ -95,9 +144,24 @@
     </div>
   </div>
 
+  <!-- Modal historial -->
+  <div class="modal" id="historyModal">
+    <div class="modalCard">
+      <div class="modalHead">
+        <div class="total">Historial de tiradas</div>
+        <div class="badge" id="histCount">0</div>
+      </div>
+      <div id="historyList" class="resultList"></div>
+      <div class="modalActions">
+        <button class="btn btnGhost" id="clearHistory">Borrar historial</button>
+        <button class="btn btnOk" id="closeHistory">Cerrar</button>
+      </div>
+    </div>
+  </div>
+
   <script>
   (function(){
-    // === DADOS y SPRITES (1 PNG estático + 1 WEBP/GIF de animación por tipo) ===
+    // ===== Config =====
     const DICE = [
       {key:'d2',  sides:2,  label:'D2'},
       {key:'d4',  sides:4,  label:'D4'},
@@ -109,7 +173,6 @@
       {key:'d100',sides:100,label:'D100'},
     ];
 
-    // Ajusta las rutas a tus archivos reales
     const SPRITES = {
       d2:  { icon: 'assets/d2/die.png',  roll: 'assets/d2/roll.webp' },
       d4:  { icon: 'assets/d4/die.png',  roll: 'assets/d4/roll.webp' },
@@ -121,7 +184,13 @@
       d100:{ icon: 'assets/d100/die.png',roll: 'assets/d100/roll.webp' },
     };
 
+    // ===== Estado =====
     const state = Object.fromEntries(DICE.map(d=>[d.key,0]));
+    let mod = 0; // modificador plano
+    let advMode = 'normal'; // 'normal' | 'adv' | 'dis'
+    const history = []; // {time, summary, detail, mod, advMode, total}
+
+    // ===== UI refs =====
     const grid = document.getElementById('diceGrid');
     const btnRoll = document.getElementById('btnRoll');
     const selCounter = document.getElementById('selCounter');
@@ -130,13 +199,30 @@
     const modal = document.getElementById('modal');
     const totalEl = document.getElementById('total');
     const badgeEl = document.getElementById('badge');
+    const resultList = document.getElementById('resultList');
     const btnClose = document.getElementById('btnClose');
     const btnAgain = document.getElementById('btnAgain');
 
-    // Render inicial
-    grid.innerHTML = DICE.map(d=>cardHTML(d)).join('');
+    const presetSelect = document.getElementById('presetSelect');
+    const presetName = document.getElementById('presetName');
+    const savePresetBtn = document.getElementById('savePreset');
+    const applyPresetBtn = document.getElementById('applyPreset');
 
-    // Fijamos handlers correctamente (evita el bug de '−' Unicode)
+    const modDec = document.getElementById('modDec');
+    const modInc = document.getElementById('modInc');
+    const modVal = document.getElementById('modVal');
+
+    const advGroup = document.getElementById('advGroup');
+
+    const openHistoryBtn = document.getElementById('openHistory');
+    const historyModal = document.getElementById('historyModal');
+    const historyList = document.getElementById('historyList');
+    const histCount = document.getElementById('histCount');
+    const clearHistoryBtn = document.getElementById('clearHistory');
+    const closeHistoryBtn = document.getElementById('closeHistory');
+
+    // ===== Render inicial =====
+    grid.innerHTML = DICE.map(d=>cardHTML(d)).join('');
     for (const d of DICE){
       const minus = document.querySelector(`[data-key="${d.key}"][data-action="dec"]`);
       const plus  = document.querySelector(`[data-key="${d.key}"][data-action="inc"]`);
@@ -144,7 +230,57 @@
       plus.addEventListener('click',  ()=> adjust(d.key,+1));
     }
 
-    updateUI();
+    // Modificador
+    modDec.addEventListener('click', ()=>{ mod--; updateUI(); });
+    modInc.addEventListener('click', ()=>{ mod++; updateUI(); });
+
+    // Ventaja/Desventaja
+    advGroup.addEventListener('click', (e)=>{
+      if (e.target.tagName!=='BUTTON') return;
+      advMode = e.target.dataset.mode;
+      Array.from(advGroup.querySelectorAll('button')).forEach(b=>b.classList.toggle('active', b.dataset.mode===advMode));
+    });
+
+    // Presets (con localStorage)
+    loadPresets();
+    savePresetBtn.addEventListener('click', ()=>{
+      const name = (presetName.value||'').trim();
+      if (!name) return;
+      const data = { name, dice: {...state}, mod, advMode };
+      const list = readPresets();
+      const idx = list.findIndex(p=>p.name.toLowerCase()===name.toLowerCase());
+      if (idx>=0) list[idx]=data; else list.push(data);
+      localStorage.setItem('dyd_presets', JSON.stringify(list));
+      presetName.value='';
+      loadPresets(name);
+    });
+    applyPresetBtn.addEventListener('click', ()=>{
+      const sel = presetSelect.value; if (!sel) return;
+      const list = readPresets();
+      const p = list.find(x=>x.name===sel); if (!p) return;
+      Object.assign(state, p.dice); mod = p.mod||0; advMode = p.advMode||'normal';
+      Array.from(advGroup.querySelectorAll('button')).forEach(b=>b.classList.toggle('active', b.dataset.mode===advMode));
+      updateUI();
+    });
+
+    // Historial
+    openHistoryBtn.addEventListener('click', ()=>{ renderHistory(); historyModal.classList.add('show'); });
+    closeHistoryBtn.addEventListener('click', ()=> historyModal.classList.remove('show'));
+    clearHistoryBtn.addEventListener('click', ()=>{ history.length=0; renderHistory(); });
+
+    function readPresets(){
+      try{ return JSON.parse(localStorage.getItem('dyd_presets')||'[]'); }catch(_){ return []; }
+    }
+    function loadPresets(selectName){
+      const list = readPresets();
+      // añade por defecto si no existen
+      if (!list.length){
+        list.push({name:'Ataque', dice:{d20:1}, mod:0, advMode:'normal'});
+        list.push({name:'Iniciativa', dice:{d20:1}, mod:0, advMode:'normal'});
+        localStorage.setItem('dyd_presets', JSON.stringify(list));
+      }
+      presetSelect.innerHTML = `<option value="">(ninguno)</option>` + list.map(p=>`<option ${selectName===p.name?'selected':''} value="${p.name}">${p.name}</option>`).join('');
+    }
 
     function cardHTML(d){
       const files = SPRITES[d.key]||{};
@@ -161,67 +297,134 @@
       </div>`;
     }
 
-    function adjust(key,delta){
-      state[key] = Math.max(0, state[key]+delta);
-      updateUI();
-    }
+    function adjust(key,delta){ state[key] = Math.max(0, (state[key]||0)+delta); updateUI(); }
 
     function updateUI(){
-      for (const d of DICE){
-        const cnt = document.querySelector(`[data-key="${d.key}"][data-role="count"]`);
-        if (cnt) cnt.textContent = state[d.key];
-      }
+      for (const d of DICE){ const cnt = document.querySelector(`[data-key="${d.key}"][data-role="count"]`); if (cnt) cnt.textContent = state[d.key]||0; }
       const arr = DICE.filter(d=>state[d.key]>0).map(d=>`${state[d.key]}×${d.label}`);
-      const total = DICE.reduce((acc,d)=>acc+state[d.key],0);
-      selCounter.textContent = `${total} seleccionados`;
-      summary.textContent = arr.length? arr.join(' · ') : 'Sin dados seleccionados.';
-      btnRoll.disabled = total===0;
+      const totalDice = DICE.reduce((acc,d)=>acc+(state[d.key]||0),0);
+      selCounter.textContent = `${totalDice} seleccionados`;
+      const modTxt = mod? (mod>0?` + ${mod}`:` − ${Math.abs(mod)}`):'';
+      const advTxt = advMode==='adv'? ' · ventaja' : advMode==='dis'? ' · desventaja':'';
+      summary.textContent = arr.length? arr.join(' · ') + modTxt + advTxt : 'Sin dados seleccionados.';
+      btnRoll.disabled = totalDice===0;
+      modVal.textContent = mod;
     }
 
-    // Lanzamiento secuencial (animación en la propia carta). Sin números en sprites.
+    // ===== Lanzamiento secuencial con animación en carta =====
     btnRoll.addEventListener('click', doRoll);
     btnAgain.addEventListener('click', ()=>{ modal.classList.remove('show'); doRoll(); });
     btnClose.addEventListener('click', ()=> modal.classList.remove('show'));
 
     async function doRoll(){
-      const queue = [];
-      for (const d of DICE){ for(let i=0;i<state[d.key];i++) queue.push({key:d.key,sides:d.sides}); }
+      const queue = buildQueue();
       if (!queue.length) return;
       btnRoll.disabled = true;
-      let total = 0;
+      const results = [];
+      // Animación + cálculo (la animación no muestra caras; solo el modal)
       for (const item of queue){
-        const v = await animateOnCard(item.key);  // solo animación
-        // cálculo lógico del valor (no visible en sprite)
-        total += 1 + Math.floor(Math.random()*item.sides);
+        await animateOnCard(item.key);
+        results.push( rollOne(item) );
       }
       btnRoll.disabled = false;
-      showTotal(total, queue.length);
+      showResults(queue, results);
+    }
+
+    function buildQueue(){
+      const q = [];
+      for (const d of DICE){ const n=state[d.key]||0; for(let i=0;i<n;i++) q.push({key:d.key,sides:d.sides}); }
+      return q;
+    }
+
+    function rollOne(item){
+      if (item.key==='d20' && advMode!=='normal'){
+        const a = 1+Math.floor(Math.random()*20);
+        const b = 1+Math.floor(Math.random()*20);
+        const chosen = advMode==='adv'? Math.max(a,b): Math.min(a,b);
+        return {key:'d20', sides:20, pair:[a,b], chosen, advMode};
+      }
+      const val = 1+Math.floor(Math.random()*item.sides);
+      return {key:item.key, sides:item.sides, val};
     }
 
     function animateOnCard(key){
       return new Promise((resolve)=>{
-        const icon = document.querySelector(`.icon[data-key='${key}']`);
-        if (!icon) return resolve();
-        const spr = document.createElement('div');
-        spr.className = 'sprite';
-        const img = document.createElement('img');
-        const conf = SPRITES[key];
-        if (conf && conf.roll){ img.src = conf.roll; }
-        else { img.src = fallbackRollData(key); }
+        const icon = document.querySelector(`.icon[data-key='${key}']`); if(!icon) return resolve();
+        const spr = document.createElement('div'); spr.className='sprite';
+        const img = document.createElement('img'); const conf = SPRITES[key];
+        img.src = conf && conf.roll ? conf.roll : fallbackRollData();
         spr.appendChild(img); icon.appendChild(spr);
         setTimeout(()=>{ spr.classList.add('fadeout'); setTimeout(()=>{ spr.remove(); resolve(); }, 220); }, 1000);
       });
     }
 
-    function showTotal(sum, count){
-      totalEl.textContent = `Total: ${sum}`;
-      badgeEl.textContent = `${count} dado${count!==1?'s':''}`;
+    function showResults(queue, results){
+      // Suma por tipo y global
+      const byType = {};
+      let sum = 0;
+      for (const r of results){
+        const k = r.key; byType[k] = byType[k]||[];
+        if (k==='d20' && r.pair){ byType[k].push(r); sum += r.chosen; }
+        else { byType[k].push(r.val); sum += r.val; }
+      }
+      const finalTotal = sum + mod;
+      // Cabecera
+      totalEl.textContent = `Total: ${finalTotal}`;
+      const diceCount = queue.length;
+      badgeEl.textContent = `${diceCount} dado${diceCount!==1?'s':''}${mod? (mod>0?` · +${mod}`:` · ${mod}`):''}${advMode!=='normal'?` · ${advMode==='adv'?'ventaja':'desventaja'}`:''}`;
+      // Detalle
+      const order = DICE.map(d=>d.key);
+      const lines = [];
+      for (const k of order){
+        if (!byType[k]) continue;
+        const sides = DICE.find(d=>d.key===k).sides;
+        const label = `D${sides}`;
+        if (k==='d20' && advMode!=='normal'){
+          // Mostrar cada par y el elegido
+          const parts = byType[k].map(o=>`(${o.pair[0]}, ${o.pair[1]}) → <strong>${o.chosen}</strong>`);
+          const subtotal = byType[k].reduce((a,b)=>a+b.chosen,0);
+          lines.push(`<div class="line"><div>${label} (${parts.length}) ${advMode==='adv'?'con ventaja':'con desventaja'}:</div><div>${parts.join(' + ')} = <strong>${subtotal}</strong></div></div>`);
+        } else {
+          const arr = byType[k];
+          const subtotal = arr.reduce((a,b)=>a+b,0);
+          lines.push(`<div class="line"><div>${label} (${arr.length}):</div><div>${arr.join(' + ')} = <strong>${subtotal}</strong></div></div>`);
+        }
+      }
+      // Modificador al final
+      if (mod){
+        lines.push(`<div class="line"><div>Modificador:</div><div>${mod>0?'+':''}${mod}</div></div>`);
+      }
+      resultList.innerHTML = lines.join('');
       modal.classList.add('show');
+
+      // Guardar en historial
+      const entry = {
+        time: new Date().toLocaleString(),
+        summary: getSelectionSummary(),
+        mod, advMode,
+        total: finalTotal,
+        detailHTML: resultList.innerHTML
+      };
+      history.unshift(entry); // último primero
     }
 
-    // ====== FALLBACKS (por si no subes aún imágenes) ======
+    function getSelectionSummary(){
+      const arr = DICE.filter(d=>state[d.key]>0).map(d=>`${state[d.key]}×${d.label}`);
+      const modTxt = mod? (mod>0?` + ${mod}`:` − ${Math.abs(mod)}`):'';
+      const advTxt = advMode==='adv'? ' · ventaja' : advMode==='dis'? ' · desventaja':'';
+      return (arr.join(' · ')||'—') + modTxt + advTxt;
+    }
+
+    function renderHistory(){
+      histCount.textContent = `${history.length}`;
+      if (!history.length){ historyList.innerHTML = '<div class="muted">Sin tiradas aún.</div>'; return; }
+      historyList.innerHTML = history.map(h=>
+        `<div class="line"><div><strong>${h.time}</strong><br/><span class="muted">${h.summary}</span></div><div><strong>${h.total}</strong></div></div>`
+      ).join('');
+    }
+
+    // ===== Fallbacks =====
     function fallbackIconData(key){
-      // simple SVG sin números, color por tipo
       const colors = { d2:'#f59e0b', d4:'#2563eb', d6:'#eab308', d8:'#10b981', d10:'#9333ea', d12:'#84cc16', d20:'#ef4444', d100:'#8b5cf6' };
       const c = colors[key]||'#38bdf8';
       const shape = key==='d6' ? 'square' : (key==='d4'?'tri':'poly');
@@ -235,17 +438,17 @@
       }
       return 'data:image/svg+xml;charset=utf-8,' + encodeURIComponent(svg);
     }
-
-    function fallbackRollData(key){
-      // GIF/WEBP simulado con SVG animado (simple) por si no hay roll.webp
-      const c = '#ffffff';
+    function fallbackRollData(){
       const svg = `<svg viewBox='0 0 100 100' xmlns='http://www.w3.org/2000/svg'>
-        <circle cx='50' cy='50' r='36' fill='none' stroke='${c}' stroke-width='6' stroke-linecap='round'>
+        <circle cx='50' cy='50' r='36' fill='none' stroke='#ffffff' stroke-width='6' stroke-linecap='round'>
           <animateTransform attributeName='transform' type='rotate' from='0 50 50' to='360 50 50' dur='0.9s' repeatCount='indefinite'/>
         </circle>
       </svg>`;
       return 'data:image/svg+xml;charset=utf-8,' + encodeURIComponent(svg);
     }
+
+    // ===== Arranque =====
+    updateUI();
   })();
   </script>
 </body>
