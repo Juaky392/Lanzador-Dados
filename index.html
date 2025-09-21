@@ -4,40 +4,51 @@
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1, user-scalable=no" />
   <title>Lanzador de dados – DyD</title>
+  <!-- Retro font -->
+  <link href="https://fonts.googleapis.com/css2?family=Press+Start+2P&display=swap" rel="stylesheet">
   <style>
     :root{
-      --bg:#0f172a; --panel:#0b1220ee; --card:#0f172acc; --text:#e5e7eb; --muted:#94a3b8; --accent:#38bdf8; --ok:#22c55e; --warn:#f59e0b; --danger:#ef4444;
+      --bg:#0f172a; --panel:#0b1220ee; --card:#0f172acc; --text:#e5e7eb; --muted:#94a3b8; --accent:#22d3ee; --ok:#22c55e;
     }
     html,body{height:100%;margin:0;background:var(--bg);color:var(--text);font-family:system-ui,-apple-system,Segoe UI,Roboto,Ubuntu,Cantarell,Noto Sans,sans-serif}
     .app{min-height:100%;display:flex;flex-direction:column}
+
+    /* ===== Title retro ===== */
+    .retroWrap{max-width:1100px;margin:0 auto;padding:14px 16px 4px}
+    .retro{font-family:'Press Start 2P', monospace; font-size:18px; color:#fff; text-transform:uppercase; letter-spacing:1px;}
+    .retro .glow{display:inline-block; padding:8px 10px; border-radius:10px; background:linear-gradient(90deg,#0ea5e9 0%,#22d3ee 40%,#a78bfa 100%); -webkit-background-clip:text; background-clip:text; color:transparent; text-shadow:0 0 18px #22d3ee55}
+
+    /* ===== HUD ===== */
     header{position:sticky;top:0;z-index:10;background:var(--panel);backdrop-filter:blur(8px);border-bottom:1px solid #ffffff22}
-    .hdr{max-width:1100px;margin:0 auto;padding:12px 14px;display:flex;gap:12px;align-items:center;justify-content:space-between}
-    .title{font-weight:800;letter-spacing:.3px}
-    .subtitle{color:var(--muted);font-size:.92rem}
-    .hud{max-width:1100px;margin:0 auto;padding:8px 14px 12px;display:grid;grid-template-columns:1fr auto;gap:10px;align-items:center}
+    .hud{max-width:1100px;margin:0 auto;padding:10px 14px;display:grid;grid-template-columns:1fr auto;gap:10px;align-items:center}
     .controls{display:flex;flex-wrap:wrap;gap:8px}
-    .seg{display:inline-flex;border:1px solid #ffffff33;border-radius:10px;overflow:hidden}
-    .seg button{background:#111827;color:#e5e7eb;border:none;padding:8px 10px;cursor:pointer}
-    .seg button.active{background:var(--accent);color:#0b1220;font-weight:800}
-    .field{display:inline-flex;align-items:center;gap:6px;border:1px solid #ffffff33;border-radius:10px;padding:2px 6px;background:#0b1220}
-    .field input[type="text"], .field input[type="number"]{background:transparent;border:none;color:#e5e7eb;outline:none;width:120px}
+    .field{display:inline-flex;align-items:center;gap:6px;border:1px solid #ffffff33;border-radius:10px;padding:4px 6px;background:#0b1220}
+    .field input[type="text"]{background:transparent;border:none;color:#e5e7eb;outline:none;width:140px}
+    .field select{background:transparent;border:none;color:#e5e7eb;outline:none}
     .step{display:inline-flex;border:1px solid #ffffff33;border-radius:10px;overflow:hidden}
     .step button{background:#111827;color:#e5e7eb;border:none;width:34px;height:34px;font-weight:800;cursor:pointer}
     .step .val{min-width:34px;text-align:center;display:grid;place-items:center;font-weight:800;padding:0 6px}
+    .seg{display:inline-flex;border:1px solid #ffffff33;border-radius:10px;overflow:hidden}
+    .seg button{background:#111827;color:#e5e7eb;border:none;padding:8px 10px;cursor:pointer}
+    .seg button.active{background:var(--accent);color:#03202a;font-weight:800}
     .ghost{appearance:none;border:1px solid #ffffff33;background:transparent;color:#e5e7eb;border-radius:10px;padding:8px 10px;cursor:pointer}
-    .primary{appearance:none;border:none;background:var(--accent);color:#0b1220;font-weight:800;padding:10px 12px;border-radius:10px;cursor:pointer}
+    .primary{appearance:none;border:none;background:var(--accent);color:#03202a;font-weight:800;padding:10px 12px;border-radius:10px;cursor:pointer}
 
     main{flex:1}
     .wrap{max-width:1100px;margin:0 auto;padding:14px}
     .grid{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:12px}
     @media(min-width:760px){.grid{grid-template-columns:repeat(4,minmax(0,1fr));}}
 
-    .card{background:var(--card);border:1px solid #ffffff22;border-radius:16px;padding:12px;box-shadow:0 10px 30px #0006;display:flex;flex-direction:column;gap:10px}
+    .card{background:var(--card);border:1px solid #ffffff22;border-radius:16px;padding:12px;box-shadow:0 10px 30px #0006;display:flex;flex-direction:column;gap:10px;transition:border-color .15s, box-shadow .15s}
+    .card.active{border-color:var(--accent); box-shadow:0 0 0 2px #22d3ee55, 0 0 18px #22d3ee88, inset 0 0 12px #22d3ee33}
+
     .icon{position:relative;height:110px;border-radius:12px;background:linear-gradient(145deg,#0e162b,#0a1120);display:grid;place-items:center;border:1px solid #ffffff1a;overflow:hidden}
-    .icon img.base{width:96px;height:96px;object-fit:contain;image-rendering:crisp-edges}
-    .sprite{position:absolute;inset:8px;display:grid;place-items:center;border-radius:12px;pointer-events:none}
+    .icon img.base{width:96px;height:96px;object-fit:contain;image-rendering:crisp-edges;transition:opacity .12s}
+    .sprite{position:absolute;inset:8px;display:grid;place-items:center;border-radius:12px;pointer-events:none;will-change:transform}
     .sprite img{width:96px;height:96px;object-fit:contain}
-    .sprite.fadeout{animation:fadeOut .22s ease both}
+    .sprite.spin{animation:spin .6s linear infinite}
+    @keyframes spin{from{transform:rotate(0deg)}to{transform:rotate(360deg)}}
+    .sprite.fadeout{animation:fadeOut .18s ease both}
     @keyframes fadeOut{from{opacity:1;transform:scale(1)}to{opacity:0;transform:scale(.98)}}
 
     .row{display:flex;justify-content:space-between;align-items:center}
@@ -50,7 +61,7 @@
     .footerBar{position:sticky;bottom:0;background:var(--panel);backdrop-filter:blur(8px);border-top:1px solid #ffffff22}
     .footerWrap{max-width:1100px;margin:0 auto;padding:10px 14px;display:flex;gap:10px;align-items:center;justify-content:space-between}
     .summary{color:var(--muted)}
-    .btnPrimary{appearance:none;border:none;background:var(--accent);color:#0b1220;font-weight:800;padding:12px 16px;border-radius:14px;box-shadow:0 10px 24px #0008;cursor:pointer}
+    .btnPrimary{appearance:none;border:none;background:var(--accent);color:#03202a;font-weight:800;padding:12px 16px;border-radius:14px;box-shadow:0 10px 24px #0008;cursor:pointer}
     .btnPrimary:disabled{opacity:.5;cursor:not-allowed}
 
     /* Modales */
@@ -65,39 +76,31 @@
     .modalActions{display:flex;justify-content:flex-end;gap:10px;margin-top:12px}
     .btn{appearance:none;border:none;border-radius:12px;padding:10px 12px;cursor:pointer}
     .btnGhost{background:transparent;border:1px solid #ffffff44;color:#e5e7eb}
-    .btnOk{background:var(--ok);color:#0b1220;font-weight:800}
+    .btnOk{background:var(--ok);color:#03202a;font-weight:800}
   </style>
 </head>
 <body>
   <div class="app">
+    <!-- Retro title before HUD -->
+    <div class="retroWrap"><div class="retro"><span class="glow">Lanzador de dados DyD</span></div></div>
+
     <header>
-      <div class="hdr">
-        <div>
-          <div class="title">Lanzador de dados – Dungeons & Dragons</div>
-          <div class="subtitle">Presets · modificadores · ventaja/desventaja · historial</div>
-        </div>
-        <div class="muted" id="selCounter">0 seleccionados</div>
-      </div>
-      <!-- HUD superior -->
+      <!-- HUD compacto -->
       <div class="hud">
         <div class="controls">
           <!-- Presets -->
           <div class="field">
-            <span style="opacity:.7">Preset</span>
-            <select id="presetSelect" style="background:transparent;color:#e5e7eb;border:none;outline:none">
-              <option value="">(ninguno)</option>
+            <select id="presetSelect">
+              <option value="">Preset: ninguno</option>
             </select>
-            <button class="ghost" id="applyPreset">Aplicar</button>
-          </div>
-          <div class="field">
             <input id="presetName" type="text" placeholder="Guardar como…" />
             <button class="primary" id="savePreset">Guardar</button>
           </div>
           <!-- Modificador -->
           <div class="field">
-            <span style="opacity:.7">Mod</span>
+            <span style="opacity:.75">Mod</span>
             <div class="step">
-              <button id="modDec">−</button>
+              <button id="modDec">-</button>
               <div class="val" id="modVal">0</div>
               <button id="modInc">+</button>
             </div>
@@ -186,14 +189,13 @@
 
     // ===== Estado =====
     const state = Object.fromEntries(DICE.map(d=>[d.key,0]));
-    let mod = 0; // modificador plano
+    let mod = 0; // modificador
     let advMode = 'normal'; // 'normal' | 'adv' | 'dis'
-    const history = []; // {time, summary, detail, mod, advMode, total}
+    const history = [];
 
     // ===== UI refs =====
     const grid = document.getElementById('diceGrid');
     const btnRoll = document.getElementById('btnRoll');
-    const selCounter = document.getElementById('selCounter');
     const summary = document.getElementById('summary');
 
     const modal = document.getElementById('modal');
@@ -206,7 +208,6 @@
     const presetSelect = document.getElementById('presetSelect');
     const presetName = document.getElementById('presetName');
     const savePresetBtn = document.getElementById('savePreset');
-    const applyPresetBtn = document.getElementById('applyPreset');
 
     const modDec = document.getElementById('modDec');
     const modInc = document.getElementById('modInc');
@@ -239,28 +240,26 @@
       if (e.target.tagName!=='BUTTON') return;
       advMode = e.target.dataset.mode;
       Array.from(advGroup.querySelectorAll('button')).forEach(b=>b.classList.toggle('active', b.dataset.mode===advMode));
+      updateUI();
     });
 
-    // Presets (con localStorage)
+    // Presets (localStorage)
     loadPresets();
+    presetSelect.addEventListener('change', ()=>{
+      const sel = presetSelect.value; if (!sel) return;
+      const list = readPresets(); const p = list.find(x=>x.name===sel); if (!p) return;
+      Object.assign(state, {d2:0,d4:0,d6:0,d8:0,d10:0,d12:0,d20:0,d100:0}, p.dice); mod=p.mod||0; advMode=p.advMode||'normal';
+      Array.from(advGroup.querySelectorAll('button')).forEach(b=>b.classList.toggle('active', b.dataset.mode===advMode));
+      updateUI();
+    });
     savePresetBtn.addEventListener('click', ()=>{
-      const name = (presetName.value||'').trim();
-      if (!name) return;
+      const name = (presetName.value||'').trim(); if(!name) return;
       const data = { name, dice: {...state}, mod, advMode };
       const list = readPresets();
       const idx = list.findIndex(p=>p.name.toLowerCase()===name.toLowerCase());
       if (idx>=0) list[idx]=data; else list.push(data);
       localStorage.setItem('dyd_presets', JSON.stringify(list));
-      presetName.value='';
-      loadPresets(name);
-    });
-    applyPresetBtn.addEventListener('click', ()=>{
-      const sel = presetSelect.value; if (!sel) return;
-      const list = readPresets();
-      const p = list.find(x=>x.name===sel); if (!p) return;
-      Object.assign(state, p.dice); mod = p.mod||0; advMode = p.advMode||'normal';
-      Array.from(advGroup.querySelectorAll('button')).forEach(b=>b.classList.toggle('active', b.dataset.mode===advMode));
-      updateUI();
+      presetName.value=''; loadPresets(name);
     });
 
     // Historial
@@ -273,13 +272,12 @@
     }
     function loadPresets(selectName){
       const list = readPresets();
-      // añade por defecto si no existen
       if (!list.length){
         list.push({name:'Ataque', dice:{d20:1}, mod:0, advMode:'normal'});
         list.push({name:'Iniciativa', dice:{d20:1}, mod:0, advMode:'normal'});
         localStorage.setItem('dyd_presets', JSON.stringify(list));
       }
-      presetSelect.innerHTML = `<option value="">(ninguno)</option>` + list.map(p=>`<option ${selectName===p.name?'selected':''} value="${p.name}">${p.name}</option>`).join('');
+      presetSelect.innerHTML = `<option value="">Preset: ninguno</option>` + list.map(p=>`<option ${selectName===p.name?'selected':''} value="${p.name}">${p.name}</option>`).join('');
     }
 
     function cardHTML(d){
@@ -290,7 +288,7 @@
         <div class="icon" data-key="${d.key}"><img class="base" alt="${d.label}" src="${iconSrc}"/></div>
         <div class="row"><div class="label">${d.label}</div><div class="muted">${d.sides} caras</div></div>
         <div class="row qty">
-          <button data-key="${d.key}" data-action="dec" aria-label="menos">−</button>
+          <button data-key="${d.key}" data-action="dec" aria-label="menos">-</button>
           <div class="count" data-role="count" data-key="${d.key}">0</div>
           <button data-key="${d.key}" data-action="inc" aria-label="más">+</button>
         </div>
@@ -303,25 +301,24 @@
       for (const d of DICE){ const cnt = document.querySelector(`[data-key="${d.key}"][data-role="count"]`); if (cnt) cnt.textContent = state[d.key]||0; }
       const arr = DICE.filter(d=>state[d.key]>0).map(d=>`${state[d.key]}×${d.label}`);
       const totalDice = DICE.reduce((acc,d)=>acc+(state[d.key]||0),0);
-      selCounter.textContent = `${totalDice} seleccionados`;
       const modTxt = mod? (mod>0?` + ${mod}`:` − ${Math.abs(mod)}`):'';
       const advTxt = advMode==='adv'? ' · ventaja' : advMode==='dis'? ' · desventaja':'';
       summary.textContent = arr.length? arr.join(' · ') + modTxt + advTxt : 'Sin dados seleccionados.';
-      btnRoll.disabled = totalDice===0;
-      modVal.textContent = mod;
+      btnRoll.disabled = totalDice===0; modVal.textContent = mod;
     }
 
-    // ===== Lanzamiento secuencial con animación en carta =====
+    // ===== Lanzamiento rápido con resalte y sin "doble imagen" =====
+    const ROLL_TIME = 650;  // ms por dado
+    const FADE_TIME = 160;  // ms fade sprite
+
     btnRoll.addEventListener('click', doRoll);
     btnAgain.addEventListener('click', ()=>{ modal.classList.remove('show'); doRoll(); });
     btnClose.addEventListener('click', ()=> modal.classList.remove('show'));
 
     async function doRoll(){
-      const queue = buildQueue();
-      if (!queue.length) return;
+      const queue = buildQueue(); if (!queue.length) return;
       btnRoll.disabled = true;
       const results = [];
-      // Animación + cálculo (la animación no muestra caras; solo el modal)
       for (const item of queue){
         await animateOnCard(item.key);
         results.push( rollOne(item) );
@@ -331,8 +328,7 @@
     }
 
     function buildQueue(){
-      const q = [];
-      for (const d of DICE){ const n=state[d.key]||0; for(let i=0;i<n;i++) q.push({key:d.key,sides:d.sides}); }
+      const q = []; for (const d of DICE){ const n=state[d.key]||0; for(let i=0;i<n;i++) q.push({key:d.key,sides:d.sides}); }
       return q;
     }
 
@@ -343,69 +339,42 @@
         const chosen = advMode==='adv'? Math.max(a,b): Math.min(a,b);
         return {key:'d20', sides:20, pair:[a,b], chosen, advMode};
       }
-      const val = 1+Math.floor(Math.random()*item.sides);
-      return {key:item.key, sides:item.sides, val};
+      return {key:item.key, sides:item.sides, val: 1+Math.floor(Math.random()*item.sides)};
     }
 
     function animateOnCard(key){
       return new Promise((resolve)=>{
         const icon = document.querySelector(`.icon[data-key='${key}']`); if(!icon) return resolve();
-        const spr = document.createElement('div'); spr.className='sprite';
+        const card = icon.closest('.card'); card.classList.add('active');
+        const base = icon.querySelector('img.base'); base && (base.style.opacity='0');
+        const spr = document.createElement('div'); spr.className='sprite spin';
         const img = document.createElement('img'); const conf = SPRITES[key];
         img.src = conf && conf.roll ? conf.roll : fallbackRollData();
         spr.appendChild(img); icon.appendChild(spr);
-        setTimeout(()=>{ spr.classList.add('fadeout'); setTimeout(()=>{ spr.remove(); resolve(); }, 220); }, 1000);
+        setTimeout(()=>{
+          spr.classList.add('fadeout');
+          setTimeout(()=>{ spr.remove(); base && (base.style.opacity='1'); card.classList.remove('active'); resolve(); }, FADE_TIME);
+        }, ROLL_TIME);
       });
     }
 
     function showResults(queue, results){
-      // Suma por tipo y global
-      const byType = {};
-      let sum = 0;
-      for (const r of results){
-        const k = r.key; byType[k] = byType[k]||[];
-        if (k==='d20' && r.pair){ byType[k].push(r); sum += r.chosen; }
-        else { byType[k].push(r.val); sum += r.val; }
-      }
+      const byType = {}; let sum = 0;
+      for (const r of results){ const k=r.key; byType[k]=byType[k]||[]; if(k==='d20'&&r.pair){byType[k].push(r); sum+=r.chosen;} else {byType[k].push(r.val); sum+=r.val;} }
       const finalTotal = sum + mod;
-      // Cabecera
       totalEl.textContent = `Total: ${finalTotal}`;
       const diceCount = queue.length;
       badgeEl.textContent = `${diceCount} dado${diceCount!==1?'s':''}${mod? (mod>0?` · +${mod}`:` · ${mod}`):''}${advMode!=='normal'?` · ${advMode==='adv'?'ventaja':'desventaja'}`:''}`;
-      // Detalle
-      const order = DICE.map(d=>d.key);
-      const lines = [];
-      for (const k of order){
-        if (!byType[k]) continue;
-        const sides = DICE.find(d=>d.key===k).sides;
-        const label = `D${sides}`;
-        if (k==='d20' && advMode!=='normal'){
-          // Mostrar cada par y el elegido
-          const parts = byType[k].map(o=>`(${o.pair[0]}, ${o.pair[1]}) → <strong>${o.chosen}</strong>`);
-          const subtotal = byType[k].reduce((a,b)=>a+b.chosen,0);
-          lines.push(`<div class="line"><div>${label} (${parts.length}) ${advMode==='adv'?'con ventaja':'con desventaja'}:</div><div>${parts.join(' + ')} = <strong>${subtotal}</strong></div></div>`);
-        } else {
-          const arr = byType[k];
-          const subtotal = arr.reduce((a,b)=>a+b,0);
-          lines.push(`<div class="line"><div>${label} (${arr.length}):</div><div>${arr.join(' + ')} = <strong>${subtotal}</strong></div></div>`);
-        }
+      const order = DICE.map(d=>d.key); const lines = [];
+      for (const k of order){ if(!byType[k]) continue; const sides=DICE.find(d=>d.key===k).sides; const label=`D${sides}`;
+        if(k==='d20'&&advMode!=='normal'){ const parts=byType[k].map(o=>`(${o.pair[0]}, ${o.pair[1]}) → <strong>${o.chosen}</strong>`); const subtotal=byType[k].reduce((a,b)=>a+b.chosen,0); lines.push(`<div class="line"><div>${label} (${parts.length}) ${advMode==='adv'?'con ventaja':'con desventaja'}:</div><div>${parts.join(' + ')} = <strong>${subtotal}</strong></div></div>`); }
+        else { const arr=byType[k]; const subtotal=arr.reduce((a,b)=>a+b,0); lines.push(`<div class="line"><div>${label} (${arr.length}):</div><div>${arr.join(' + ')} = <strong>${subtotal}</strong></div></div>`); }
       }
-      // Modificador al final
-      if (mod){
-        lines.push(`<div class="line"><div>Modificador:</div><div>${mod>0?'+':''}${mod}</div></div>`);
-      }
-      resultList.innerHTML = lines.join('');
-      modal.classList.add('show');
+      if (mod){ lines.push(`<div class="line"><div>Modificador:</div><div>${mod>0?'+':''}${mod}</div></div>`); }
+      resultList.innerHTML = lines.join(''); modal.classList.add('show');
 
-      // Guardar en historial
-      const entry = {
-        time: new Date().toLocaleString(),
-        summary: getSelectionSummary(),
-        mod, advMode,
-        total: finalTotal,
-        detailHTML: resultList.innerHTML
-      };
-      history.unshift(entry); // último primero
+      // Historial
+      history.unshift({ time:new Date().toLocaleString(), summary:getSelectionSummary(), mod, advMode, total:finalTotal });
     }
 
     function getSelectionSummary(){
@@ -418,9 +387,7 @@
     function renderHistory(){
       histCount.textContent = `${history.length}`;
       if (!history.length){ historyList.innerHTML = '<div class="muted">Sin tiradas aún.</div>'; return; }
-      historyList.innerHTML = history.map(h=>
-        `<div class="line"><div><strong>${h.time}</strong><br/><span class="muted">${h.summary}</span></div><div><strong>${h.total}</strong></div></div>`
-      ).join('');
+      historyList.innerHTML = history.map(h=>`<div class="line"><div><strong>${h.time}</strong><br/><span class="muted">${h.summary}</span></div><div><strong>${h.total}</strong></div></div>`).join('');
     }
 
     // ===== Fallbacks =====
@@ -429,19 +396,15 @@
       const c = colors[key]||'#38bdf8';
       const shape = key==='d6' ? 'square' : (key==='d4'?'tri':'poly');
       let svg='';
-      if (shape==='square'){
-        svg = `<svg viewBox='0 0 100 100' xmlns='http://www.w3.org/2000/svg'><rect x='16' y='16' width='68' height='68' rx='14' fill='${c}'/></svg>`;
-      } else if (shape==='tri'){
-        svg = `<svg viewBox='0 0 100 100' xmlns='http://www.w3.org/2000/svg'><polygon points='50,14 86,86 14,86' fill='${c}'/></svg>`;
-      } else {
-        svg = `<svg viewBox='0 0 100 100' xmlns='http://www.w3.org/2000/svg'><polygon points='50,12 86,38 74,84 26,84 14,38' fill='${c}'/></svg>`;
-      }
+      if (shape==='square') svg = `<svg viewBox='0 0 100 100' xmlns='http://www.w3.org/2000/svg'><rect x='16' y='16' width='68' height='68' rx='14' fill='${c}'/></svg>`;
+      else if (shape==='tri') svg = `<svg viewBox='0 0 100 100' xmlns='http://www.w3.org/2000/svg'><polygon points='50,14 86,86 14,86' fill='${c}'/></svg>`;
+      else svg = `<svg viewBox='0 0 100 100' xmlns='http://www.w3.org/2000/svg'><polygon points='50,12 86,38 74,84 26,84 14,38' fill='${c}'/></svg>`;
       return 'data:image/svg+xml;charset=utf-8,' + encodeURIComponent(svg);
     }
     function fallbackRollData(){
       const svg = `<svg viewBox='0 0 100 100' xmlns='http://www.w3.org/2000/svg'>
         <circle cx='50' cy='50' r='36' fill='none' stroke='#ffffff' stroke-width='6' stroke-linecap='round'>
-          <animateTransform attributeName='transform' type='rotate' from='0 50 50' to='360 50 50' dur='0.9s' repeatCount='indefinite'/>
+          <animateTransform attributeName='transform' type='rotate' from='0 50 50' to='360 50 50' dur='0.5s' repeatCount='indefinite'/>
         </circle>
       </svg>`;
       return 'data:image/svg+xml;charset=utf-8,' + encodeURIComponent(svg);
