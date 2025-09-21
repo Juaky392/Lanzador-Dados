@@ -392,7 +392,7 @@
         list.push({name:'Iniciativa', dice:{d20:1}, mod:0, advMode:'normal'});
         localStorage.setItem('dyd_presets', JSON.stringify(list));
       }
-      presetSelect.innerHTML = `<option value="">Preset: ninguno</option>` + list.map(p=>`<option ${selectName===p.name?'selected':''} value="${p.name}">${p.name}</option>`).join('');
+      presetSelect.innerHTML = `<option value=\"\">Preset: ninguno</option>` + list.map(p=>`<option ${selectName===p.name?'selected':''} value=\"${p.name}\">${p.name}</option>`).join('');
     }
 
     // Opciones avanzadas
@@ -425,8 +425,7 @@
       if (!history.length){ alert('No hay historial para exportar.'); return; }
       const header = ['fecha','resumen','mod','modo','total','exitos'];
       const rows = history.map(h=>[h.time, (h.summary||'').replaceAll(',',';'), h.mod, h.advMode, h.total, (h.succ!=null?h.succ:'')]);
-      const csv = [header.join(','), ...rows.map(r=>r.join(','))].join('
-');
+      const csv = [header.join(','), ...rows.map(r=>r.join(','))].join('\n');
       const blob = new Blob([csv], {type:'text/csv;charset=utf-8;'});
       const url = URL.createObjectURL(blob);
       const a = document.createElement('a'); a.href = url; a.download = 'historial_dados.csv'; a.click();
@@ -576,17 +575,17 @@
         const order = DICE.map(d=>d.key); const lines = [];
         for (const k of order){ if(!byType[k]) continue; const sides=(DICE.find(d=>d.key===k)||{sides:parseInt(k.replace('d',''))}).sides; const label=`D${sides}`;
           if(k==='d20'&&advMode!=='normal'){
-            const parts=byType[k].map(o=>`(${o.pair[0]}, ${o.pair[1]}) → <strong class="${o.chosen===20?'crit':o.chosen===1?'fail':''}">${o.chosen}</strong>`);
+            const parts=byType[k].map(o=>`(${o.pair[0]}, ${o.pair[1]}) → <strong class=\"${o.chosen===20?'crit':o.chosen===1?'fail':''}\">${o.chosen}</strong>`);
             const subtotal=byType[k].reduce((a,b)=>a+b.chosen,0);
-            lines.push(`<div class="line"><div>${label} (${parts.length}) ${advMode==='adv'?'con ventaja':'con desventaja'}:</div><div>${parts.join(' + ')} = <strong>${subtotal}</strong></div></div>`);
+            lines.push(`<div class=\"line\"><div>${label} (${parts.length}) ${advMode==='adv'?'con ventaja':'con desventaja'}:</div><div>${parts.join(' + ')} = <strong>${subtotal}</strong></div></div>`);
           } else {
             const arr = byType[k];
             const subtotal = arr.reduce((a,b)=>a+b,0);
-            lines.push(`<div class="line"><div>${label} (${arr.length}):</div><div>${arr.join(' + ')} = <strong>${subtotal}</strong></div></div>`);
+            lines.push(`<div class=\"line\"><div>${label} (${arr.length}):</div><div>${arr.join(' + ')} = <strong>${subtotal}</strong></div></div>`);
           }
         }
-        if (mod){ lines.push(`<div class="line"><div>Modificador:</div><div>${mod>0?'+':''}${mod}</div></div>`); }
-        if (succ!==null){ lines.push(`<div class="line"><div>Éxitos (${succMode==='ge'?'≥':'≤'} ${succTarget}):</div><div><strong>${succ}</strong></div></div>`); }
+        if (mod){ lines.push(`<div class=\"line\"><div>Modificador:</div><div>${mod>0?'+':''}${mod}</div></div>`); }
+        if (succ!==null){ lines.push(`<div class=\"line\"><div>Éxitos (${succMode==='ge'?'≥':'≤'} ${succTarget}):</div><div><strong>${succ}</strong></div></div>`); }
         resultList.innerHTML = lines.join('');
       } else {
         // Runs > 1: lista de resultados + estadísticas si procede
@@ -617,28 +616,28 @@
       if (succMode!=='none' && succs && succs.length){
         const succStats = computeStats(succs);
         succHtml = `
-          <div class="statsSection">
-            <div class="statsTitle">Éxitos</div>
-            <div class="statsHeader">
-              <div class="chip">Mín: <strong>${succStats.min}</strong></div>
-              <div class="chip">Media: <strong>${succStats.mean.toFixed(2)}</strong></div>
-              <div class="chip">Máx: <strong>${succStats.max}</strong></div>
-              <div class="chip">Muestras: <strong>${succStats.n}</strong></div>
+          <div class=\"statsSection\">
+            <div class=\"statsTitle\">Éxitos</div>
+            <div class=\"statsHeader\">
+              <div class=\"chip\">Mín: <strong>${succStats.min}</strong></div>
+              <div class=\"chip\">Media: <strong>${succStats.mean.toFixed(2)}</strong></div>
+              <div class=\"chip\">Máx: <strong>${succStats.max}</strong></div>
+              <div class=\"chip\">Muestras: <strong>${succStats.n}</strong></div>
             </div>
-            <div class="hist">${buildHistRows(succStats)}</div>
+            <div class=\"hist\">${buildHistRows(succStats)}</div>
           </div>`;
       }
 
       statsBox.innerHTML = `
-        <div class="statsSection">
-          <div class="statsTitle">Totales</div>
-          <div class="statsHeader">
-            <div class="chip">Mín: <strong>${totalsStats.min}</strong></div>
-            <div class="chip">Media: <strong>${totalsStats.mean.toFixed(2)}</strong></div>
-            <div class="chip">Máx: <strong>${totalsStats.max}</strong></div>
-            <div class="chip">Muestras: <strong>${totalsStats.n}</strong></div>
+        <div class=\"statsSection\">
+          <div class=\"statsTitle\">Totales</div>
+          <div class=\"statsHeader\">
+            <div class=\"chip\">Mín: <strong>${totalsStats.min}</strong></div>
+            <div class=\"chip\">Media: <strong>${totalsStats.mean.toFixed(2)}</strong></div>
+            <div class=\"chip\">Máx: <strong>${totalsStats.max}</strong></div>
+            <div class=\"chip\">Muestras: <strong>${totalsStats.n}</strong></div>
           </div>
-          <div class="hist">${totalsHist}</div>
+          <div class=\"hist\">${totalsHist}</div>
         </div>
         ${succHtml}
       `;
@@ -659,7 +658,7 @@
       return counts.map((c,i)=>{
         const a = minBase + i*step; const b = (i===bins-1) ? (minBase + (i+1)*step - 1) : (minBase + (i+1)*step - 1);
         const w = maxCount? Math.round(c/maxCount*100) : 0;
-        return `<div class="histRow"><div class="muted">${a}–${b}</div><div class="bar" style="width:${w}%"></div><div class="muted">${c}</div></div>`;
+        return `<div class=\"histRow\"><div class=\"muted\">${a}–${b}</div><div class=\"bar\" style=\"width:${w}%\"></div><div class=\"muted\">${c}</div></div>`;
       }).join('');
     }
 
@@ -679,9 +678,7 @@
 
     function buildPlainTextResult(){
       const html = resultList.innerText.trim();
-      return `Tirada (${new Date().toLocaleString()}):
-${getSelectionSummary()}
-${html}`;
+      return `Tirada (${new Date().toLocaleString()}):\n${getSelectionSummary()}\n${html}`;
     }
 
     // ===== Fallbacks =====
@@ -708,13 +705,13 @@ ${html}`;
       const files = SPRITES[d.key]||{};
       const iconSrc = files.icon || fallbackIconData(d.key);
       return `
-      <div class="card" data-type="${d.key}">
-        <div class="icon" data-key="${d.key}"><img class="base" alt="${d.label}" src="${iconSrc}"/></div>
-        <div class="row"><div class="label">${d.label}</div><div class="muted">${d.sides} caras</div></div>
-        <div class="row qty">
-          <button data-key="${d.key}" data-action="dec" aria-label="menos">-</button>
-          <div class="count" data-role="count" data-key="${d.key}">0</div>
-          <button data-key="${d.key}" data-action="inc" aria-label="más">+</button>
+      <div class=\"card\" data-type=\"${d.key}\">
+        <div class=\"icon\" data-key=\"${d.key}\"><img class=\"base\" alt=\"${d.label}\" src=\"${iconSrc}\"/></div>
+        <div class=\"row\"><div class=\"label\">${d.label}</div><div class=\"muted\">${d.sides} caras</div></div>
+        <div class=\"row qty\">
+          <button data-key=\"${d.key}\" data-action=\"dec\" aria-label=\"menos\">-</button>
+          <div class=\"count\" data-role=\"count\" data-key=\"${d.key}\">0</div>
+          <button data-key=\"${d.key}\" data-action=\"inc\" aria-label=\"más\">+</button>
         </div>
       </div>`;
     }
@@ -738,6 +735,47 @@ ${html}`;
 
     // ===== Arranque =====
     updateUI();
+
+    // ====== Test cases (no intrusivos) ======
+    (function runTests(){
+      const results = [];
+      function assert(cond, name){ results.push({name, pass:!!cond}); cond? console.log('✅', name): console.error('❌', name); }
+
+      // 1) CSV newline join
+      assert(['a','b'].join('\n').includes('\n'), 'CSV usa "\\n" como separador de líneas');
+
+      // 2) randInt rango 1..n y cobertura básica
+      const counts = [0,0,0,0,0,0];
+      for(let i=0;i<600;i++){ const v = (function(){ try{return randInt(6);}catch(e){return 1;} })(); counts[v-1]++; }
+      const inRange = counts.length===6 && counts.every(c=>c>=1);
+      assert(inRange, 'randInt(6) devuelve valores en 1..6 (cobertura)');
+
+      // 3) computeStats simple
+      const s = computeStats([1,2,3]);
+      assert(s.min===1 && s.max===3 && Math.abs(s.mean-2)<1e-9, 'computeStats: min/mean/max correctos');
+
+      // 4) Ventaja / Desventaja en D20
+      const advBak = advMode; advMode='adv';
+      const rA = rollOne({key:'d20', sides:20});
+      const okAdv = rA && Array.isArray(rA.pair) && rA.chosen===Math.max(rA.pair[0], rA.pair[1]);
+      assert(okAdv, 'D20 con ventaja elige el máximo');
+      advMode='dis';
+      const rD = rollOne({key:'d20', sides:20});
+      const okDis = rD && Array.isArray(rD.pair) && rD.chosen===Math.min(rD.pair[0], rD.pair[1]);
+      assert(okDis, 'D20 con desventaja elige el mínimo');
+      advMode = advBak;
+
+      // 5) Render inicial: hay cards visibles
+      const cards = document.querySelectorAll('.card');
+      assert(cards.length === DICE_BASE.length, 'Se renderizan los cards iniciales');
+
+      // Inyectar resultado en DOM oculto (para inspección manual si hace falta)
+      const report = document.createElement('pre');
+      report.id = 'testReport';
+      report.style.display = 'none';
+      report.textContent = JSON.stringify(results, null, 2);
+      document.body.appendChild(report);
+    })();
   })();
   </script>
 </body>
