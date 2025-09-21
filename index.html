@@ -31,9 +31,9 @@
 
     .card{background:var(--card);border:1px solid #ffffff22;border-radius:16px;padding:12px;
       box-shadow:0 10px 30px #0006;display:flex;flex-direction:column;gap:10px}
-    .icon{height:84px;border-radius:12px;background:linear-gradient(145deg,#0e162b,#0a1120);
-      display:grid;place-items:center;border:1px solid #ffffff1a}
-    .icon svg{width:70px;height:70px;filter:drop-shadow(0 4px 10px rgba(0,0,0,.5))}
+    .icon{position:relative;height:96px;border-radius:12px;background:linear-gradient(145deg,#0e162b,#0a1120);
+      display:grid;place-items:center;border:1px solid #ffffff1a;overflow:hidden}
+    .icon svg{width:82px;height:82px;filter:drop-shadow(0 4px 10px rgba(0,0,0,.5))}
     .row{display:flex;justify-content:space-between;align-items:center}
 
     .label{font-weight:700}
@@ -51,18 +51,19 @@
     .btnPrimary{appearance:none;border:none;background:var(--accent);color:#0b1220;font-weight:800;padding:12px 16px;border-radius:14px;box-shadow:0 10px 24px #0008;cursor:pointer}
     .btnPrimary:disabled{opacity:.5;cursor:not-allowed}
 
-    /* ====== ESCENARIO / DADOS 3D ====== */
-    .stage{margin-top:12px;display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:8px;perspective:900px}
-    .dieCell{background:#0b1220;border:1px solid #ffffff22;border-radius:12px;min-height:86px;display:grid;place-items:center;overflow:hidden}
-    .die3d{width:76px;height:76px;display:grid;place-items:center;border-radius:12px;background:linear-gradient(145deg,#0f172a,#0a1222);
-      border:1px solid #ffffff22;transform-style:preserve-3d}
-    .face{font-weight:900;font-size:26px;color:#fff;text-shadow:0 2px 8px #0008}
-
-    .rolling{animation:rollSpin .85s cubic-bezier(.2,.7,.2,1) both}
-    @keyframes rollSpin{
-      0%{transform:rotateX(0deg) rotateY(0deg) scale(1)}
-      100%{transform:rotateX(720deg) rotateY(540deg) scale(1.02)}
+    /* ====== SPRITES EN CADA CARD ====== */
+    .sprite{position:absolute;inset:8px;display:grid;place-items:center;border-radius:12px;
+      background:radial-gradient(120% 120% at 30% 20%, #1e293b 0%, #0b1220 60%, #0b1220 100%);
+      border:1px solid #ffffff22;box-shadow:0 10px 24px #0008;pointer-events:none}
+    .sprite svg{width:84px;height:84px}
+    .sprite.rolling{animation:rollSprite .9s cubic-bezier(.2,.7,.2,1) infinite}
+    @keyframes rollSprite{
+      0%{transform:translateZ(0) rotateX(0) rotateY(0)}
+      50%{transform:translateZ(0) rotateX(180deg) rotateY(90deg)}
+      100%{transform:translateZ(0) rotateX(360deg) rotateY(180deg)}
     }
+    .sprite.fadeout{animation:fadeOut .3s ease both}
+    @keyframes fadeOut{from{opacity:1;transform:scale(1)}to{opacity:0;transform:scale(.96)}}
 
     /* modal */
     .modal{position:fixed;inset:0;background:#0009;display:none;align-items:center;justify-content:center;z-index:40}
@@ -85,7 +86,7 @@
       <div class="hdr">
         <div>
           <div class="title">Lanzador de dados – Dungeons & Dragons</div>
-          <div class="subtitle">Elige tus dados y lánzalos. Animación 3D secuencial + suma total.</div>
+          <div class="subtitle">Selecciona dados y lánzalos. Animación con sprites dentro de cada carta.</div>
         </div>
         <div class="muted" id="selCounter">0 seleccionados</div>
       </div>
@@ -95,9 +96,6 @@
       <div class="wrap">
         <!-- Selector de dados -->
         <div class="grid" id="diceGrid"></div>
-
-        <!-- Escenario de tirada (se rellena al lanzar) -->
-        <div class="stage" id="stage"></div>
       </div>
     </main>
 
@@ -139,7 +137,6 @@
 
     const state = Object.fromEntries(DICE.map(d=>[d.key,0]));
     const grid = document.getElementById('diceGrid');
-    const stage = document.getElementById('stage');
     const btnRoll = document.getElementById('btnRoll');
     const selCounter = document.getElementById('selCounter');
     const summary = document.getElementById('summary');
@@ -182,8 +179,8 @@
 
     function cardHTML(d){
       return `
-      <div class="card">
-        <div class="icon">${svgIcon(d.sides)}</div>
+      <div class="card" data-type="${d.key}">
+        <div class="icon" data-key="${d.key}">${svgIcon(d.sides)}</div>
         <div class="row"><div class="label">${d.label}</div><div class="muted">${d.sides} caras</div></div>
         <div class="row qty">
           <button data-key="${d.key}" data-act="-">−</button>
@@ -197,19 +194,19 @@
       if (sides===2){
         return `<svg viewBox="0 0 100 100" xmlns="http://www.w3.org/2000/svg">
           <defs><radialGradient id="g" cx="50%" cy="35%" r="65%"><stop offset="0%" stop-color="#38bdf8"/><stop offset="100%" stop-color="#0ea5e9"/></radialGradient></defs>
-          <circle cx="50" cy="50" r="34" fill="url(#g)" stroke="#ffffffaa" stroke-width="3"/>
+          <circle cx="50" cy="50" r="38" fill="url(#g)" stroke="#ffffffaa" stroke-width="3"/>
           <text x="50" y="57" text-anchor="middle" font-size="34" font-weight="900" fill="#fff">2</text>
         </svg>`;
       }
       if (sides===100){
         return `<svg viewBox="0 0 100 100" xmlns="http://www.w3.org/2000/svg">
           <defs><radialGradient id="gh" cx="50%" cy="35%" r="65%"><stop offset="0%" stop-color="#a78bfa"/><stop offset="100%" stop-color="#6d28d9"/></radialGradient></defs>
-          <circle cx="50" cy="50" r="34" fill="url(#gh)" stroke="#ffffffaa" stroke-width="3"/>
+          <circle cx="50" cy="50" r="38" fill="url(#gh)" stroke="#ffffffaa" stroke-width="3"/>
           <text x="50" y="57" text-anchor="middle" font-size="28" font-weight="900" fill="#fff">100</text>
         </svg>`;
       }
       // regular polygon
-      const pts = polyPoints(50,50,32,sides);
+      const pts = polyPoints(50,50,36,sides);
       return `<svg viewBox="0 0 100 100" xmlns="http://www.w3.org/2000/svg">
         <defs><linearGradient id="p${sides}" x1="0" y1="0" x2="1" y2="1"><stop offset="0%" stop-color="#22d3ee"/><stop offset="100%" stop-color="#0ea5e9"/></linearGradient></defs>
         <polygon points="${pts}" fill="url(#p${sides})" stroke="#ffffffaa" stroke-width="3"/>
@@ -218,51 +215,96 @@
     }
 
     function polyPoints(cx,cy,r,n){
-      const a=-Math.PI/2; // start at top
-      const step=2*Math.PI/n; let pts=[];
-      for(let i=0;i<n;i++){
-        const x=cx+r*Math.cos(a+i*step), y=cy+r*Math.sin(a+i*step);
-        pts.push(`${x.toFixed(2)},${y.toFixed(2)}`);
-      }
+      const a=-Math.PI/2; const step=2*Math.PI/n; let pts=[];
+      for(let i=0;i<n;i++){ const x=cx+r*Math.cos(a+i*step), y=cy+r*Math.sin(a+i*step); pts.push(`${x.toFixed(2)},${y.toFixed(2)}`); }
       return pts.join(' ');
     }
 
-    // --- Rolling 3D secuencial ---
+    // ===== Sprites por tipo =====
+    function spriteSVG(sides, value){
+      if (sides===6) return svgD6(value);
+      if (sides===2) return svgCoin(value);
+      return svgPolyDie(sides, value);
+    }
+
+    function svgCoin(v){
+      return `<svg viewBox='0 0 100 100' xmlns='http://www.w3.org/2000/svg'>
+        <defs><radialGradient id='cg' cx='50%' cy='35%' r='65%'>
+          <stop offset='0%' stop-color='#f59e0b'/><stop offset='100%' stop-color='#b45309'/>
+        </radialGradient></defs>
+        <circle cx='50' cy='50' r='40' fill='url(#cg)' stroke='#fff8' stroke-width='3'/>
+        <text x='50' y='57' text-anchor='middle' font-size='36' font-weight='900' fill='#fff'>${v}</text>
+      </svg>`;
+    }
+
+    function svgPolyDie(sides, v){
+      const pts = polyPoints(50,50,38,sides);
+      return `<svg viewBox='0 0 100 100' xmlns='http://www.w3.org/2000/svg'>
+        <defs><linearGradient id='lg' x1='0' y1='0' x2='1' y2='1'>
+          <stop offset='0%' stop-color='#22d3ee'/><stop offset='100%' stop-color='#0ea5e9'/>
+        </linearGradient></defs>
+        <polygon points='${pts}' fill='url(#lg)' stroke='#fff8' stroke-width='3'/>
+        <text x='50' y='57' text-anchor='middle' font-size='30' font-weight='900' fill='#fff'>${v}</text>
+      </svg>`;
+    }
+
+    function svgD6(v){
+      // Dado con pips reales
+      const pips = {
+        1:[[50,50]],
+        2:[[30,30],[70,70]],
+        3:[[30,30],[50,50],[70,70]],
+        4:[[30,30],[70,30],[30,70],[70,70]],
+        5:[[30,30],[70,30],[50,50],[30,70],[70,70]],
+        6:[[30,30],[70,30],[30,50],[70,50],[30,70],[70,70]]
+      }[Math.max(1,Math.min(6,v))];
+      const dots = pips.map(([x,y])=>`<circle cx='${x}' cy='${y}' r='5' fill='#fff'/>`).join('');
+      return `<svg viewBox='0 0 100 100' xmlns='http://www.w3.org/2000/svg'>
+        <rect x='14' y='14' width='72' height='72' rx='14' ry='14' fill='#e11d48' stroke='#fff8' stroke-width='3'/>
+        ${dots}
+      </svg>`;
+    }
+
+    // --- Lanzamiento secuencial DENTRO DE CADA CARD ---
     btnRoll.addEventListener('click', doRoll);
     btnAgain.addEventListener('click', ()=>{ modal.classList.remove('show'); doRoll(); });
     btnClose.addEventListener('click', ()=> modal.classList.remove('show'));
 
     async function doRoll(){
-      const set = [];
-      for (const d of DICE){ for(let i=0;i<state[d.key];i++) set.push({key:d.key,sides:d.sides}); }
-      if (!set.length) return;
-      // Render tiles
-      stage.innerHTML = set.map(()=>`<div class="dieCell"><div class="die3d"><div class="face">–</div></div></div>`).join('');
-      const cells = Array.from(stage.querySelectorAll('.dieCell'));
-      const results = [];
+      const queue = [];
+      for (const d of DICE){ for(let i=0;i<state[d.key];i++) queue.push({key:d.key,sides:d.sides}); }
+      if (!queue.length) return;
       btnRoll.disabled = true;
-      // Secuencial: de 1 en 1, 1 segundo aprox cada uno
-      for (let i=0;i<cells.length;i++){
-        const res = await rollOne(cells[i], set[i].sides);
-        results.push(res);
+      const results = [];
+      for (const item of queue){
+        const val = await rollInCard(item.key, item.sides);
+        results.push(val);
       }
       btnRoll.disabled = false;
-      showResults(set, results);
+      showResults(queue, results);
     }
 
-    function rollOne(cell, sides){
-      return new Promise(resolve=>{
-        const die = cell.querySelector('.die3d');
-        const face = cell.querySelector('.face');
-        die.classList.add('rolling');
-        const t = setInterval(()=>{ face.textContent = 1 + Math.floor(Math.random()*sides); }, 70);
+    function rollInCard(key, sides){
+      return new Promise((resolve)=>{
+        const icon = document.querySelector(`.icon[data-key='${key}']`);
+        if (!icon) return resolve(1);
+        const spr = document.createElement('div');
+        spr.className = 'sprite rolling';
+        icon.appendChild(spr);
+        // frames aleatorios
+        const tick = setInterval(()=>{
+          const r = 1 + Math.floor(Math.random()*sides);
+          spr.innerHTML = spriteSVG(sides, r);
+        }, 70);
+        // final tras ~1s
         const final = 1 + Math.floor(Math.random()*sides);
         setTimeout(()=>{
-          clearInterval(t);
-          die.classList.remove('rolling');
-          face.textContent = final;
+          clearInterval(tick);
+          spr.classList.remove('rolling');
+          spr.innerHTML = spriteSVG(sides, final);
+          setTimeout(()=>{ spr.classList.add('fadeout'); setTimeout(()=> spr.remove(), 280); }, 350);
           resolve(final);
-        }, 950); // ~1s por dado
+        }, 1000);
       });
     }
 
@@ -280,7 +322,7 @@
         const sides = DICE.find(d=>d.key===k).sides;
         const label = `D${sides}`;
         const subtotal = arr.reduce((a,b)=>a+b,0);
-        lines.push(`<div class="line"><div>${label} (${arr.length}):</div><div>${arr.join(' + ')} = <strong>${subtotal}</strong></div></div>`);
+        lines.push(`<div class='line'><div>${label} (${arr.length}):</div><div>${arr.join(' + ')} = <strong>${subtotal}</strong></div></div>`);
       }
       resultList.innerHTML = lines.join('');
       modal.classList.add('show');
