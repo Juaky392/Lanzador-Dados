@@ -6,54 +6,49 @@
   <title>Lanzador de dados – DyD</title>
   <style>
     :root{
-      --bg:#0f172a; --panel:#0b1220ee; --card:#0f172acc;
-      --text:#e5e7eb; --muted:#94a3b8; --accent:#38bdf8; --ok:#22c55e;
+      --bg:#0f172a; --panel:#0b1220ee; --card:#0f172acc; --text:#e5e7eb; --muted:#94a3b8; --accent:#38bdf8; --ok:#22c55e;
     }
-    html,body{height:100%;margin:0;background:var(--bg);color:var(--text);
-      font-family:system-ui,-apple-system,Segoe UI,Roboto,Ubuntu,Cantarell,Noto Sans,sans-serif}
+    html,body{height:100%;margin:0;background:var(--bg);color:var(--text);font-family:system-ui,-apple-system,Segoe UI,Roboto,Ubuntu,Cantarell,Noto Sans,sans-serif}
     .app{min-height:100%;display:flex;flex-direction:column}
     header{position:sticky;top:0;z-index:10;background:var(--panel);backdrop-filter:blur(8px);border-bottom:1px solid #ffffff22}
     .hdr{max-width:980px;margin:0 auto;padding:14px 16px;display:flex;gap:12px;align-items:center;justify-content:space-between}
     .title{font-weight:800;letter-spacing:.3px}
     .subtitle{color:var(--muted);font-size:.92rem}
-    main{flex:1;}
+    main{flex:1}
     .wrap{max-width:980px;margin:0 auto;padding:16px}
+
     .grid{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:12px}
     @media(min-width:760px){.grid{grid-template-columns:repeat(4,minmax(0,1fr));}}
-    .card{background:var(--card);border:1px solid #ffffff22;border-radius:16px;padding:12px;
-      box-shadow:0 10px 30px #0006;display:flex;flex-direction:column;gap:10px}
-    .icon{position:relative;height:100px;border-radius:12px;background:linear-gradient(145deg,#0e162b,#0a1120);
-      display:grid;place-items:center;border:1px solid #ffffff1a;overflow:hidden}
-    .icon svg{width:86px;height:86px;filter:drop-shadow(0 4px 10px rgba(0,0,0,.5))}
+
+    .card{background:var(--card);border:1px solid #ffffff22;border-radius:16px;padding:12px;box-shadow:0 10px 30px #0006;display:flex;flex-direction:column;gap:10px}
+    .icon{position:relative;height:110px;border-radius:12px;background:linear-gradient(145deg,#0e162b,#0a1120);display:grid;place-items:center;border:1px solid #ffffff1a;overflow:hidden}
+    .icon img.base{width:96px;height:96px;object-fit:contain;image-rendering:crisp-edges}
+    .sprite{position:absolute;inset:8px;display:grid;place-items:center;border-radius:12px;pointer-events:none}
+    .sprite img{width:96px;height:96px;object-fit:contain}
+    .sprite.fadeout{animation:fadeOut .22s ease both}
+    @keyframes fadeOut{from{opacity:1;transform:scale(1)}to{opacity:0;transform:scale(.98)}}
+
     .row{display:flex;justify-content:space-between;align-items:center}
     .label{font-weight:700}
     .muted{color:var(--muted);font-size:.9rem}
+
     .qty{display:flex;align-items:center;gap:8px}
-    .qty button{appearance:none;border:none;background:#111827;color:#e5e7eb;border:1px solid #ffffff22;
-      width:38px;height:38px;border-radius:12px;font-size:18px;font-weight:800;cursor:pointer}
+    .qty button{appearance:none;border:none;background:#111827;color:#e5e7eb;border:1px solid #ffffff22;width:38px;height:38px;border-radius:12px;font-size:18px;font-weight:800;cursor:pointer}
     .qty .count{min-width:28px;text-align:center;font-weight:800}
+
     .footerBar{position:sticky;bottom:0;background:var(--panel);backdrop-filter:blur(8px);border-top:1px solid #ffffff22}
     .footerWrap{max-width:980px;margin:0 auto;padding:12px 16px;display:flex;gap:12px;align-items:center;justify-content:space-between}
     .summary{color:var(--muted)}
     .btnPrimary{appearance:none;border:none;background:var(--accent);color:#0b1220;font-weight:800;padding:12px 16px;border-radius:14px;box-shadow:0 10px 24px #0008;cursor:pointer}
     .btnPrimary:disabled{opacity:.5;cursor:not-allowed}
 
-    /* Sprites dentro de cada card */
-    .sprite{position:absolute;inset:8px;display:grid;place-items:center;border-radius:12px;
-      pointer-events:none; /* evita tocar el fondo */ }
-    .sprite img{width:88px;height:88px;object-fit:contain;image-rendering:crisp-edges;image-rendering:-webkit-optimize-contrast}
-    .sprite.fadeout{animation:fadeOut .25s ease both}
-    @keyframes fadeOut{from{opacity:1;transform:scale(1)}to{opacity:0;transform:scale(.98)}}
-
-    /* modal */
+    /* Modal */
     .modal{position:fixed;inset:0;background:#0009;display:none;align-items:center;justify-content:center;z-index:40}
     .modal.show{display:flex}
     .modalCard{background:var(--panel);border:1px solid #ffffff22;border-radius:16px;padding:16px 14px;min-width:min(92vw,520px)}
     .modalHead{display:flex;justify-content:space-between;align-items:center;margin-bottom:8px}
     .total{font-size:28px;font-weight:900;color:#fff}
     .badge{background:#16a34a22;color:#86efac;border:1px solid #16a34a55;padding:4px 8px;border-radius:999px;font-weight:700}
-    .resultList{margin-top:8px;color:#e5e7eb}
-    .resultList .line{display:flex;justify-content:space-between;padding:6px 0;border-bottom:1px dashed #ffffff22}
     .modalActions{display:flex;justify-content:flex-end;gap:10px;margin-top:12px}
     .btn{appearance:none;border:none;border-radius:12px;padding:10px 12px;cursor:pointer}
     .btnGhost{background:transparent;border:1px solid #ffffff44;color:#e5e7eb}
@@ -66,7 +61,7 @@
       <div class="hdr">
         <div>
           <div class="title">Lanzador de dados – Dungeons & Dragons</div>
-          <div class="subtitle">Sprites reales dentro de cada carta · animación secuencial · suma total</div>
+          <div class="subtitle">Sprites simples (1 PNG + 1 animación por dado). Resultado solo en el modal.</div>
         </div>
         <div class="muted" id="selCounter">0 seleccionados</div>
       </div>
@@ -93,7 +88,6 @@
         <div class="total" id="total">Total: 0</div>
         <div class="badge" id="badge"></div>
       </div>
-      <div class="resultList" id="resultList"></div>
       <div class="modalActions">
         <button class="btn btnGhost" id="btnClose">Cerrar</button>
         <button class="btn btnOk" id="btnAgain">Lanzar de nuevo</button>
@@ -103,7 +97,7 @@
 
   <script>
   (function(){
-    // Tipos de dados
+    // === DADOS y SPRITES (1 PNG estático + 1 WEBP/GIF de animación por tipo) ===
     const DICE = [
       {key:'d2',  sides:2,  label:'D2'},
       {key:'d4',  sides:4,  label:'D4'},
@@ -115,22 +109,16 @@
       {key:'d100',sides:100,label:'D100'},
     ];
 
-    // === Ruta de sprites (pon tus imágenes aquí) ===
-    // Estructura recomendada:
-    // assets/
-    //   d6/roll.webp, 1.png..6.png
-    //   d20/roll.webp, 1.png..20.png
-    //   d10/roll.webp, 1.png..10.png
-    //   d8/..., d12/..., d4/..., d2/1.png, d2/2.png (o heads/tails)
+    // Ajusta las rutas a tus archivos reales
     const SPRITES = {
-      d6:   { roll: 'assets/d6/roll.webp',   face: v => `assets/d6/${v}.png` },
-      d20:  { roll: 'assets/d20/roll.webp',  face: v => `assets/d20/${v}.png` },
-      d12:  { roll: 'assets/d12/roll.webp',  face: v => `assets/d12/${v}.png` },
-      d10:  { roll: 'assets/d10/roll.webp',  face: v => `assets/d10/${v}.png` },
-      d8:   { roll: 'assets/d8/roll.webp',   face: v => `assets/d8/${v}.png` },
-      d4:   { roll: 'assets/d4/roll.webp',   face: v => `assets/d4/${v}.png` },
-      d2:   { roll: 'assets/d2/roll.webp',   face: v => `assets/d2/${v}.png` },
-      d100: { roll: 'assets/d100/roll.webp', face: v => `assets/d100/${v}.png` },
+      d2:  { icon: 'assets/d2/die.png',  roll: 'assets/d2/roll.webp' },
+      d4:  { icon: 'assets/d4/die.png',  roll: 'assets/d4/roll.webp' },
+      d6:  { icon: 'assets/d6/die.png',  roll: 'assets/d6/roll.webp' },
+      d8:  { icon: 'assets/d8/die.png',  roll: 'assets/d8/roll.webp' },
+      d10: { icon: 'assets/d10/die.png', roll: 'assets/d10/roll.webp' },
+      d12: { icon: 'assets/d12/die.png', roll: 'assets/d12/roll.webp' },
+      d20: { icon: 'assets/d20/die.png', roll: 'assets/d20/roll.webp' },
+      d100:{ icon: 'assets/d100/die.png',roll: 'assets/d100/roll.webp' },
     };
 
     const state = Object.fromEntries(DICE.map(d=>[d.key,0]));
@@ -142,19 +130,36 @@
     const modal = document.getElementById('modal');
     const totalEl = document.getElementById('total');
     const badgeEl = document.getElementById('badge');
-    const resultList = document.getElementById('resultList');
     const btnClose = document.getElementById('btnClose');
     const btnAgain = document.getElementById('btnAgain');
 
-    // Render de cartas
+    // Render inicial
     grid.innerHTML = DICE.map(d=>cardHTML(d)).join('');
+
+    // Fijamos handlers correctamente (evita el bug de '−' Unicode)
     for (const d of DICE){
-      const minus = document.querySelector(`[data-key="${d.key}"][data-act="-"]`);
-      const plus  = document.querySelector(`[data-key="${d.key}"][data-act="+"]`);
+      const minus = document.querySelector(`[data-key="${d.key}"][data-action="dec"]`);
+      const plus  = document.querySelector(`[data-key="${d.key}"][data-action="inc"]`);
       minus.addEventListener('click', ()=> adjust(d.key,-1));
       plus.addEventListener('click',  ()=> adjust(d.key,+1));
     }
+
     updateUI();
+
+    function cardHTML(d){
+      const files = SPRITES[d.key]||{};
+      const iconSrc = files.icon || fallbackIconData(d.key);
+      return `
+      <div class="card" data-type="${d.key}">
+        <div class="icon" data-key="${d.key}"><img class="base" alt="${d.label}" src="${iconSrc}"/></div>
+        <div class="row"><div class="label">${d.label}</div><div class="muted">${d.sides} caras</div></div>
+        <div class="row qty">
+          <button data-key="${d.key}" data-action="dec" aria-label="menos">−</button>
+          <div class="count" data-role="count" data-key="${d.key}">0</div>
+          <button data-key="${d.key}" data-action="inc" aria-label="más">+</button>
+        </div>
+      </div>`;
+    }
 
     function adjust(key,delta){
       state[key] = Math.max(0, state[key]+delta);
@@ -173,49 +178,7 @@
       btnRoll.disabled = total===0;
     }
 
-    function cardHTML(d){
-      return `
-      <div class="card" data-type="${d.key}">
-        <div class="icon" data-key="${d.key}">${svgIcon(d.sides)}</div>
-        <div class="row"><div class="label">${d.label}</div><div class="muted">${d.sides} caras</div></div>
-        <div class="row qty">
-          <button data-key="${d.key}" data-act="−" aria-label="menos">−</button>
-          <div class="count" data-role="count" data-key="${d.key}">0</div>
-          <button data-key="${d.key}" data-act="+" aria-label="más">+</button>
-        </div>
-      </div>`;
-    }
-
-    // Iconos base (fallback si no hay imágenes)
-    function svgIcon(sides){
-      if (sides===2){
-        return `<svg viewBox="0 0 100 100" xmlns="http://www.w3.org/2000/svg">
-          <defs><radialGradient id="g" cx="50%" cy="35%" r="65%"><stop offset="0%" stop-color="#38bdf8"/><stop offset="100%" stop-color="#0ea5e9"/></radialGradient></defs>
-          <circle cx="50" cy="50" r="38" fill="url(#g)" stroke="#ffffffaa" stroke-width="3"/>
-          <text x="50" y="57" text-anchor="middle" font-size="34" font-weight="900" fill="#fff">2</text>
-        </svg>`;
-      }
-      if (sides===100){
-        return `<svg viewBox="0 0 100 100" xmlns="http://www.w3.org/2000/svg">
-          <defs><radialGradient id="gh" cx="50%" cy="35%" r="65%"><stop offset="0%" stop-color="#a78bfa"/><stop offset="100%" stop-color="#6d28d9"/></radialGradient></defs>
-          <circle cx="50" cy="50" r="38" fill="url(#gh)" stroke="#ffffffaa" stroke-width="3"/>
-          <text x="50" y="57" text-anchor="middle" font-size="28" font-weight="900" fill="#fff">100</text>
-        </svg>`;
-      }
-      const pts = polyPoints(50,50,36,sides);
-      return `<svg viewBox="0 0 100 100" xmlns="http://www.w3.org/2000/svg">
-        <defs><linearGradient id="p${sides}" x1="0" y1="0" x2="1" y2="1"><stop offset="0%" stop-color="#22d3ee"/><stop offset="100%" stop-color="#0ea5e9"/></linearGradient></defs>
-        <polygon points="${pts}" fill="url(#p${sides})" stroke="#ffffffaa" stroke-width="3"/>
-        <text x="50" y="57" text-anchor="middle" font-size="28" font-weight="900" fill="#fff">${sides}</text>
-      </svg>`;
-    }
-    function polyPoints(cx,cy,r,n){
-      const a=-Math.PI/2, step=2*Math.PI/n, pts=[];
-      for(let i=0;i<n;i++){ pts.push(`${(cx+r*Math.cos(a+i*step)).toFixed(2)},${(cy+r*Math.sin(a+i*step)).toFixed(2)}`); }
-      return pts.join(' ');
-    }
-
-    // Lanzamiento secuencial (con sprites por carta)
+    // Lanzamiento secuencial (animación en la propia carta). Sin números en sprites.
     btnRoll.addEventListener('click', doRoll);
     btnAgain.addEventListener('click', ()=>{ modal.classList.remove('show'); doRoll(); });
     btnClose.addEventListener('click', ()=> modal.classList.remove('show'));
@@ -225,107 +188,63 @@
       for (const d of DICE){ for(let i=0;i<state[d.key];i++) queue.push({key:d.key,sides:d.sides}); }
       if (!queue.length) return;
       btnRoll.disabled = true;
-      const results = [];
+      let total = 0;
       for (const item of queue){
-        const val = await rollInCard(item.key, item.sides);
-        results.push(val);
+        const v = await animateOnCard(item.key);  // solo animación
+        // cálculo lógico del valor (no visible en sprite)
+        total += 1 + Math.floor(Math.random()*item.sides);
       }
       btnRoll.disabled = false;
-      showResults(queue, results);
+      showTotal(total, queue.length);
     }
 
-    function rollInCard(key, sides){
+    function animateOnCard(key){
       return new Promise((resolve)=>{
         const icon = document.querySelector(`.icon[data-key='${key}']`);
-        if (!icon) return resolve(1);
-        // Capa de sprite (no mueve la card)
+        if (!icon) return resolve();
         const spr = document.createElement('div');
         spr.className = 'sprite';
         const img = document.createElement('img');
-        img.alt = `Rodando ${key}`;
-        spr.appendChild(img);
-        icon.appendChild(spr);
-
-        // Intenta usar sprite de “roll”. Si falla, fallback a números SVG animados manualmente
         const conf = SPRITES[key];
-        let animTimer = null;
-
-        function useFallback(){
-          // Fallback: número aleatorio cambiando rápido (sin rotar contenedor)
-          animTimer = setInterval(()=>{
-            const r = 1 + Math.floor(Math.random()*sides);
-            img.src = 'data:image/svg+xml;charset=utf-8,' + encodeURIComponent(polyFaceSVG(sides, r));
-          }, 70);
-        }
-
-        // 1) Arranca animación
-        if (conf && conf.roll){
-          img.onerror = ()=>{ useFallback(); };
-          img.src = conf.roll;          // GIF/WEBP animado
-        } else {
-          useFallback();
-        }
-
-        // 2) Decide resultado final y muestra cara estática
-        const final = 1 + Math.floor(Math.random()*sides);
-        setTimeout(()=>{
-          if (animTimer) { clearInterval(animTimer); animTimer=null; }
-          if (conf && conf.face){
-            img.onerror = ()=>{ img.src = 'data:image/svg+xml;charset=utf-8,' + encodeURIComponent(polyFaceSVG(sides, final)); };
-            img.src = conf.face(final); // PNG estático de la cara
-          } else {
-            img.src = 'data:image/svg+xml;charset=utf-8,' + encodeURIComponent(polyFaceSVG(sides, final));
-          }
-          // pequeña salida y retirar sprite (icono queda intacto)
-          setTimeout(()=>{ spr.classList.add('fadeout'); setTimeout(()=> spr.remove(), 240); }, 350);
-          resolve(final);
-        }, 1100); // ~1.1s por dado
+        if (conf && conf.roll){ img.src = conf.roll; }
+        else { img.src = fallbackRollData(key); }
+        spr.appendChild(img); icon.appendChild(spr);
+        setTimeout(()=>{ spr.classList.add('fadeout'); setTimeout(()=>{ spr.remove(); resolve(); }, 220); }, 1000);
       });
     }
 
-    // SVG estático de cara como fallback
-    function polyFaceSVG(sides, v){
-      if (sides===6){
-        // D6 de pips simple
-        const pips = {
-          1:[[50,50]], 2:[[30,30],[70,70]], 3:[[30,30],[50,50],[70,70]],
-          4:[[30,30],[70,30],[30,70],[70,70]],
-          5:[[30,30],[70,30],[50,50],[30,70],[70,70]],
-          6:[[30,30],[70,30],[30,50],[70,50],[30,70],[70,70]]
-        }[Math.max(1,Math.min(6,v))];
-        const dots = pips.map(([x,y])=>`<circle cx='${x}' cy='${y}' r='5' fill='#fff'/>`).join('');
-        return `<svg viewBox='0 0 100 100' xmlns='http://www.w3.org/2000/svg'>
-          <rect x='14' y='14' width='72' height='72' rx='14' ry='14' fill='#e11d48' stroke='#fff8' stroke-width='3'/>${dots}
-        </svg>`;
-      }
-      // poliedro con número
-      const pts = polyPoints(50,50,38,sides);
-      return `<svg viewBox='0 0 100 100' xmlns='http://www.w3.org/2000/svg'>
-        <defs><linearGradient id='lg' x1='0' y1='0' x2='1' y2='1'><stop offset='0%' stop-color='#22d3ee'/><stop offset='100%' stop-color='#0ea5e9'/></linearGradient></defs>
-        <polygon points='${pts}' fill='url(#lg)' stroke='#fff8' stroke-width='3'/>
-        <text x='50' y='57' text-anchor='middle' font-size='30' font-weight='900' fill='#fff'>${v}</text>
-      </svg>`;
+    function showTotal(sum, count){
+      totalEl.textContent = `Total: ${sum}`;
+      badgeEl.textContent = `${count} dado${count!==1?'s':''}`;
+      modal.classList.add('show');
     }
 
-    function showResults(set, results){
-      const sum = results.reduce((a,b)=>a+b,0);
-      totalEl.textContent = `Total: ${sum}`;
-      badgeEl.textContent = `${results.length} dado${results.length!==1?'s':''}`;
-
-      const byType = new Map();
-      for (let i=0;i<set.length;i++){ const k=set[i].key; if(!byType.has(k)) byType.set(k,[]); byType.get(k).push(results[i]); }
-      const order = DICE.map(d=>d.key);
-      const lines = [];
-      for (const k of order){
-        if (!byType.has(k)) continue;
-        const arr = byType.get(k);
-        const sides = DICE.find(d=>d.key===k).sides;
-        const label = `D${sides}`;
-        const subtotal = arr.reduce((a,b)=>a+b,0);
-        lines.push(`<div class="line"><div>${label} (${arr.length}):</div><div>${arr.join(' + ')} = <strong>${subtotal}</strong></div></div>`);
+    // ====== FALLBACKS (por si no subes aún imágenes) ======
+    function fallbackIconData(key){
+      // simple SVG sin números, color por tipo
+      const colors = { d2:'#f59e0b', d4:'#2563eb', d6:'#eab308', d8:'#10b981', d10:'#9333ea', d12:'#84cc16', d20:'#ef4444', d100:'#8b5cf6' };
+      const c = colors[key]||'#38bdf8';
+      const shape = key==='d6' ? 'square' : (key==='d4'?'tri':'poly');
+      let svg='';
+      if (shape==='square'){
+        svg = `<svg viewBox='0 0 100 100' xmlns='http://www.w3.org/2000/svg'><rect x='16' y='16' width='68' height='68' rx='14' fill='${c}'/></svg>`;
+      } else if (shape==='tri'){
+        svg = `<svg viewBox='0 0 100 100' xmlns='http://www.w3.org/2000/svg'><polygon points='50,14 86,86 14,86' fill='${c}'/></svg>`;
+      } else {
+        svg = `<svg viewBox='0 0 100 100' xmlns='http://www.w3.org/2000/svg'><polygon points='50,12 86,38 74,84 26,84 14,38' fill='${c}'/></svg>`;
       }
-      resultList.innerHTML = lines.join('');
-      modal.classList.add('show');
+      return 'data:image/svg+xml;charset=utf-8,' + encodeURIComponent(svg);
+    }
+
+    function fallbackRollData(key){
+      // GIF/WEBP simulado con SVG animado (simple) por si no hay roll.webp
+      const c = '#ffffff';
+      const svg = `<svg viewBox='0 0 100 100' xmlns='http://www.w3.org/2000/svg'>
+        <circle cx='50' cy='50' r='36' fill='none' stroke='${c}' stroke-width='6' stroke-linecap='round'>
+          <animateTransform attributeName='transform' type='rotate' from='0 50 50' to='360 50 50' dur='0.9s' repeatCount='indefinite'/>
+        </circle>
+      </svg>`;
+      return 'data:image/svg+xml;charset=utf-8,' + encodeURIComponent(svg);
     }
   })();
   </script>
