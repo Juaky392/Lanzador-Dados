@@ -8,22 +8,22 @@
   <link href="https://fonts.googleapis.com/css2?family=Press+Start+2P&display=swap" rel="stylesheet">
   <style>
     :root{
-      --bg:#0f172a; --panel:#0b1220ee; --card:#0f172acc; --text:#e5e7eb; --muted:#94a3b8; --accent:#22d3ee; --ok:#22c55e;
+      --bg:#0f172a; --panel:#0b1220ee; --card:#0f172acc; --text:#e5e7eb; --muted:#94a3b8; --accent:#22d3ee; --ok:#22c55e; --danger:#ef4444;
     }
-    html,body{height:100%;margin:0;background:var(--bg);color:var(--text);font-family:system-ui,-apple-system,Segoe UI,Roboto,Ubuntu,Cantarell,Noto Sans,sans-serif}
+    html,body{height:100%;margin:0;background:var(--bg);color:var(--text);font-family:system-ui,-apple-system,Segoe UI,Roboto,Ubuntu,Cantarell,Noto Sans,sans-serif;overflow-x:hidden}
     .app{min-height:100%;display:flex;flex-direction:column}
 
     /* ===== Title retro ===== */
-    .retroWrap{max-width:1100px;margin:0 auto;padding:14px 16px 4px}
+    .retroWrap{max-width:1100px;margin:0 auto;padding:14px 16px 6px}
     .retro{font-family:'Press Start 2P', monospace; font-size:18px; color:#fff; text-transform:uppercase; letter-spacing:1px;}
     .retro .glow{display:inline-block; padding:8px 10px; border-radius:10px; background:linear-gradient(90deg,#0ea5e9 0%,#22d3ee 40%,#a78bfa 100%); -webkit-background-clip:text; background-clip:text; color:transparent; text-shadow:0 0 18px #22d3ee55}
 
     /* ===== HUD ===== */
     header{position:sticky;top:0;z-index:10;background:var(--panel);backdrop-filter:blur(8px);border-bottom:1px solid #ffffff22}
-    .hud{max-width:1100px;margin:0 auto;padding:10px 14px;display:grid;grid-template-columns:1fr auto;gap:10px;align-items:center}
-    .controls{display:flex;flex-wrap:wrap;gap:8px}
+    .hud{max-width:1100px;margin:0 auto;padding:10px 14px;display:flex;gap:10px;align-items:center;flex-wrap:wrap;justify-content:space-between}
+    .controls{display:flex;flex-wrap:wrap;gap:8px;align-items:center}
     .field{display:inline-flex;align-items:center;gap:6px;border:1px solid #ffffff33;border-radius:10px;padding:4px 6px;background:#0b1220}
-    .field input[type="text"]{background:transparent;border:none;color:#e5e7eb;outline:none;width:140px}
+    .field input[type="text"], .field input[type="number"]{background:transparent;border:none;color:#e5e7eb;outline:none;width:120px}
     .field select{background:transparent;border:none;color:#e5e7eb;outline:none}
     .step{display:inline-flex;border:1px solid #ffffff33;border-radius:10px;overflow:hidden}
     .step button{background:#111827;color:#e5e7eb;border:none;width:34px;height:34px;font-weight:800;cursor:pointer}
@@ -34,21 +34,27 @@
     .ghost{appearance:none;border:1px solid #ffffff33;background:transparent;color:#e5e7eb;border-radius:10px;padding:8px 10px;cursor:pointer}
     .primary{appearance:none;border:none;background:var(--accent);color:#03202a;font-weight:800;padding:10px 12px;border-radius:10px;cursor:pointer}
 
+    /* Opciones avanzadas (colapsable) */
+    .advToggle{display:inline-flex;gap:8px;align-items:center}
+    .advanced{display:none;width:100%;padding:8px 14px;border-top:1px dashed #ffffff2a;background:#0b1220cc}
+    .advanced.show{display:block}
+    .advGrid{display:flex;flex-wrap:wrap;gap:10px;align-items:center}
+
     main{flex:1}
     .wrap{max-width:1100px;margin:0 auto;padding:14px}
     .grid{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:12px}
     @media(min-width:760px){.grid{grid-template-columns:repeat(4,minmax(0,1fr));}}
 
-    .card{background:var(--card);border:1px solid #ffffff22;border-radius:16px;padding:12px;box-shadow:0 10px 30px #0006;display:flex;flex-direction:column;gap:10px;transition:border-color .15s, box-shadow .15s}
+    .card{background:var(--card);border:1px solid #ffffff22;border-radius:16px;padding:12px;box-shadow:0 10px 30px #0006;display:flex;flex-direction:column;gap:10px;transition:border-color .12s, box-shadow .12s}
     .card.active{border-color:var(--accent); box-shadow:0 0 0 2px #22d3ee55, 0 0 18px #22d3ee88, inset 0 0 12px #22d3ee33}
 
     .icon{position:relative;height:110px;border-radius:12px;background:linear-gradient(145deg,#0e162b,#0a1120);display:grid;place-items:center;border:1px solid #ffffff1a;overflow:hidden}
     .icon img.base{width:96px;height:96px;object-fit:contain;image-rendering:crisp-edges;transition:opacity .12s}
     .sprite{position:absolute;inset:8px;display:grid;place-items:center;border-radius:12px;pointer-events:none;will-change:transform}
-    .sprite img{width:96px;height:96px;object-fit:contain}
-    .sprite.spin{animation:spin .6s linear infinite}
+    .sprite img{width:96px;height:96px;object-fit:contain;will-change:transform;transform:translateZ(0)}
+    .sprite.spin{animation:spin .45s linear infinite}
     @keyframes spin{from{transform:rotate(0deg)}to{transform:rotate(360deg)}}
-    .sprite.fadeout{animation:fadeOut .18s ease both}
+    .sprite.fadeout{animation:fadeOut .12s ease both}
     @keyframes fadeOut{from{opacity:1;transform:scale(1)}to{opacity:0;transform:scale(.98)}}
 
     .row{display:flex;justify-content:space-between;align-items:center}
@@ -67,7 +73,7 @@
     /* Modales */
     .modal{position:fixed;inset:0;background:#0009;display:none;align-items:center;justify-content:center;z-index:40}
     .modal.show{display:flex}
-    .modalCard{background:var(--panel);border:1px solid #ffffff22;border-radius:16px;padding:16px 14px;min-width:min(92vw,680px);max-height:80vh;overflow:auto}
+    .modalCard{background:var(--panel);border:1px solid #ffffff22;border-radius:16px;padding:16px 14px;min-width:min(92vw,760px);max-height:80vh;overflow:auto}
     .modalHead{display:flex;justify-content:space-between;align-items:center;margin-bottom:8px;gap:12px}
     .total{font-size:28px;font-weight:900;color:#fff}
     .badge{background:#16a34a22;color:#86efac;border:1px solid #16a34a55;padding:4px 8px;border-radius:999px;font-weight:700}
@@ -77,6 +83,17 @@
     .btn{appearance:none;border:none;border-radius:12px;padding:10px 12px;cursor:pointer}
     .btnGhost{background:transparent;border:1px solid #ffffff44;color:#e5e7eb}
     .btnOk{background:var(--ok);color:#03202a;font-weight:800}
+
+    /* Stats */
+    .statsBox{margin-top:10px;padding-top:8px;border-top:1px dashed #ffffff22}
+    .statsHeader{display:flex;gap:12px;flex-wrap:wrap;color:#e5e7eb}
+    .statsHeader .chip{background:#0b1220;border:1px solid #ffffff22;border-radius:999px;padding:4px 10px;font-weight:700}
+    .hist{margin-top:10px;display:grid;gap:6px}
+    .histRow{display:grid;grid-template-columns:80px 1fr 50px;gap:8px;align-items:center}
+    .histRow .bar{height:10px;background:linear-gradient(90deg,#22d3ee,#a78bfa);border-radius:999px}
+
+    .crit{color:#86efac}
+    .fail{color:#fca5a5}
   </style>
 </head>
 <body>
@@ -90,9 +107,7 @@
         <div class="controls">
           <!-- Presets -->
           <div class="field">
-            <select id="presetSelect">
-              <option value="">Preset: ninguno</option>
-            </select>
+            <select id="presetSelect"><option value="">Preset: ninguno</option></select>
             <input id="presetName" type="text" placeholder="Guardar como…" />
             <button class="primary" id="savePreset">Guardar</button>
           </div>
@@ -111,9 +126,50 @@
             <button data-mode="adv">Ventaja</button>
             <button data-mode="dis">Desventaja</button>
           </div>
-        </div>
-        <div>
+          <!-- Historial -->
           <button class="ghost" id="openHistory">Historial</button>
+          <!-- Opciones avanzadas toggle -->
+          <div class="advToggle"><button class="ghost" id="toggleAdv">⚙️ Opciones</button></div>
+        </div>
+      </div>
+      <!-- Panel avanzado -->
+      <div class="advanced" id="advPanel">
+        <div class="advGrid">
+          <!-- Repetir N veces -->
+          <div class="field">
+            <span style="opacity:.75">Repetir</span>
+            <div class="step">
+              <button id="repDec">-</button>
+              <div class="val" id="repVal">1</div>
+              <button id="repInc">+</button>
+            </div>
+            <span class="muted">veces</span>
+          </div>
+          <!-- Umbral de éxitos -->
+          <div class="field">
+            <span style="opacity:.75">Éxitos</span>
+            <select id="succMode">
+              <option value="none">Sin umbral</option>
+              <option value="ge">≥ objetivo</option>
+              <option value="le">≤ objetivo</option>
+            </select>
+            <input id="succTarget" type="number" value="10" min="1" max="100" />
+          </div>
+          <!-- Re-roll rules -->
+          <div class="field" style="gap:10px">
+            <label><input type="checkbox" id="rerollOnes"> Re-roll 1s (1 vez)</label>
+            <label><input type="checkbox" id="explodeMax"> Exploding en máximo</label>
+          </div>
+          <!-- Dado personalizado -->
+          <div class="field">
+            <span style="opacity:.75">Dado personalizado</span>
+            <input id="customSides" type="number" min="2" max="100" placeholder="Caras (p.ej. 7)" />
+            <button class="ghost" id="addCustom">Añadir</button>
+          </div>
+          <!-- Toggle estadísticas -->
+          <div class="field">
+            <label><input type="checkbox" id="showStats"> Mostrar estadísticas</label>
+          </div>
         </div>
       </div>
     </header>
@@ -140,7 +196,9 @@
         <div class="badge" id="badge"></div>
       </div>
       <div class="resultList" id="resultList"></div>
+      <div id="statsBox" class="statsBox" style="display:none"></div>
       <div class="modalActions">
+        <button class="btn btnGhost" id="copyResult">Copiar</button>
         <button class="btn btnGhost" id="btnClose">Cerrar</button>
         <button class="btn btnOk" id="btnAgain">Lanzar de nuevo</button>
       </div>
@@ -165,7 +223,7 @@
   <script>
   (function(){
     // ===== Config =====
-    const DICE = [
+    const DICE_BASE = [
       {key:'d2',  sides:2,  label:'D2'},
       {key:'d4',  sides:4,  label:'D4'},
       {key:'d6',  sides:6,  label:'D6'},
@@ -188,10 +246,43 @@
     };
 
     // ===== Estado =====
+    const DICE = [...DICE_BASE];
     const state = Object.fromEntries(DICE.map(d=>[d.key,0]));
     let mod = 0; // modificador
     let advMode = 'normal'; // 'normal' | 'adv' | 'dis'
     const history = [];
+
+    // Avanzadas
+    let repeatCount = 1;
+    let succMode = 'none'; // 'none' | 'ge' | 'le'
+    let succTarget = 10;
+    let rerollOnes = false;
+    let explodeMax = false;
+    let showStats = false;
+
+    // Series (para estadísticas de runs)
+    let seriesTotals = [];
+
+    // ===== Audio (traqueteo) =====
+    let audioCtx = null;
+    function getCtx(){ if(!audioCtx) audioCtx = new (window.AudioContext||window.webkitAudioContext)(); return audioCtx; }
+    function clickAt(t){
+      const ctx = getCtx();
+      const o = ctx.createOscillator();
+      const g = ctx.createGain();
+      o.type='triangle'; o.frequency.setValueAtTime(100 + Math.random()*200, t);
+      g.gain.setValueAtTime(0.0001, t);
+      g.gain.exponentialRampToValueAtTime(0.2, t+0.005);
+      g.gain.exponentialRampToValueAtTime(0.0001, t+0.08);
+      o.connect(g).connect(ctx.destination);
+      o.start(t); o.stop(t+0.09);
+    }
+    function playRattle(ms=450){
+      try{
+        const ctx = getCtx(); const now = ctx.currentTime; const n = Math.max(6, Math.min(14, Math.round(ms/50)));
+        for(let i=0;i<n;i++){ clickAt(now + i*(ms/1000)/n + Math.random()*0.02); }
+      }catch(_){/* ignore */}
+    }
 
     // ===== UI refs =====
     const grid = document.getElementById('diceGrid');
@@ -202,8 +293,10 @@
     const totalEl = document.getElementById('total');
     const badgeEl = document.getElementById('badge');
     const resultList = document.getElementById('resultList');
+    const statsBox = document.getElementById('statsBox');
     const btnClose = document.getElementById('btnClose');
     const btnAgain = document.getElementById('btnAgain');
+    const copyBtn = document.getElementById('copyResult');
 
     const presetSelect = document.getElementById('presetSelect');
     const presetName = document.getElementById('presetName');
@@ -214,7 +307,6 @@
     const modVal = document.getElementById('modVal');
 
     const advGroup = document.getElementById('advGroup');
-
     const openHistoryBtn = document.getElementById('openHistory');
     const historyModal = document.getElementById('historyModal');
     const historyList = document.getElementById('historyList');
@@ -222,13 +314,35 @@
     const clearHistoryBtn = document.getElementById('clearHistory');
     const closeHistoryBtn = document.getElementById('closeHistory');
 
+    const toggleAdvBtn = document.getElementById('toggleAdv');
+    const advPanel = document.getElementById('advPanel');
+
+    const repDec = document.getElementById('repDec');
+    const repInc = document.getElementById('repInc');
+    const repVal = document.getElementById('repVal');
+
+    const succModeSel = document.getElementById('succMode');
+    const succTargetInp = document.getElementById('succTarget');
+
+    const rerollOnesChk = document.getElementById('rerollOnes');
+    const explodeMaxChk = document.getElementById('explodeMax');
+
+    const customSidesInp = document.getElementById('customSides');
+    const addCustomBtn = document.getElementById('addCustom');
+
+    const showStatsChk = document.getElementById('showStats');
+
     // ===== Render inicial =====
-    grid.innerHTML = DICE.map(d=>cardHTML(d)).join('');
-    for (const d of DICE){
-      const minus = document.querySelector(`[data-key="${d.key}"][data-action="dec"]`);
-      const plus  = document.querySelector(`[data-key="${d.key}"][data-action="inc"]`);
-      minus.addEventListener('click', ()=> adjust(d.key,-1));
-      plus.addEventListener('click',  ()=> adjust(d.key,+1));
+    renderGrid();
+    function renderGrid(){
+      grid.innerHTML = DICE.map(d=>cardHTML(d)).join('');
+      for (const d of DICE){
+        const minus = document.querySelector(`[data-key="${d.key}"][data-action="dec"]`);
+        const plus  = document.querySelector(`[data-key="${d.key}"][data-action="inc"]`);
+        minus.addEventListener('click', ()=> adjust(d.key,-1));
+        plus.addEventListener('click',  ()=> adjust(d.key,+1));
+      }
+      updateUI();
     }
 
     // Modificador
@@ -248,7 +362,7 @@
     presetSelect.addEventListener('change', ()=>{
       const sel = presetSelect.value; if (!sel) return;
       const list = readPresets(); const p = list.find(x=>x.name===sel); if (!p) return;
-      Object.assign(state, {d2:0,d4:0,d6:0,d8:0,d10:0,d12:0,d20:0,d100:0}, p.dice); mod=p.mod||0; advMode=p.advMode||'normal';
+      Object.assign(state, resetCounts(), p.dice); mod=p.mod||0; advMode=p.advMode||'normal';
       Array.from(advGroup.querySelectorAll('button')).forEach(b=>b.classList.toggle('active', b.dataset.mode===advMode));
       updateUI();
     });
@@ -262,11 +376,6 @@
       presetName.value=''; loadPresets(name);
     });
 
-    // Historial
-    openHistoryBtn.addEventListener('click', ()=>{ renderHistory(); historyModal.classList.add('show'); });
-    closeHistoryBtn.addEventListener('click', ()=> historyModal.classList.remove('show'));
-    clearHistoryBtn.addEventListener('click', ()=>{ history.length=0; renderHistory(); });
-
     function readPresets(){
       try{ return JSON.parse(localStorage.getItem('dyd_presets')||'[]'); }catch(_){ return []; }
     }
@@ -277,7 +386,255 @@
         list.push({name:'Iniciativa', dice:{d20:1}, mod:0, advMode:'normal'});
         localStorage.setItem('dyd_presets', JSON.stringify(list));
       }
-      presetSelect.innerHTML = `<option value="">Preset: ninguno</option>` + list.map(p=>`<option ${selectName===p.name?'selected':''} value="${p.name}">${p.name}</option>`).join('');
+      presetSelect.innerHTML = `<option value=\"\">Preset: ninguno</option>` + list.map(p=>`<option ${selectName===p.name?'selected':''} value=\"${p.name}\">${p.name}</option>`).join('');
+    }
+
+    // Opciones avanzadas
+    toggleAdvBtn.addEventListener('click', ()=> advPanel.classList.toggle('show'));
+    repDec.addEventListener('click', ()=>{ repeatCount=Math.max(1, repeatCount-1); repVal.textContent=repeatCount; });
+    repInc.addEventListener('click', ()=>{ repeatCount=Math.min(100, repeatCount+1); repVal.textContent=repeatCount; });
+    succModeSel.addEventListener('change', ()=>{ succMode=succModeSel.value; succTargetInp.disabled = (succMode==='none'); });
+    succTargetInp.addEventListener('change', ()=>{ succTarget = Math.max(1, Math.min(100, parseInt(succTargetInp.value||10))); succTargetInp.value = succTarget; });
+    rerollOnesChk.addEventListener('change', ()=>{ rerollOnes = rerollOnesChk.checked; });
+    explodeMaxChk.addEventListener('change', ()=>{ explodeMax = explodeMaxChk.checked; });
+    showStatsChk.addEventListener('change', ()=>{ showStats = showStatsChk.checked; });
+
+    addCustomBtn.addEventListener('click', ()=>{
+      const n = parseInt(customSidesInp.value||0);
+      if (!n || n<2 || n>100) return;
+      const key = 'd'+n;
+      if (!DICE.find(d=>d.key===key)){
+        DICE.push({key, sides:n, label:'D'+n});
+        state[key]=0;
+        SPRITES[key] = { icon: '', roll: '' }; // usará fallbacks
+        renderGrid();
+      } else {
+        state[key] = (state[key]||0)+1; updateUI();
+      }
+      customSidesInp.value='';
+    });
+
+    // Historial
+    openHistoryBtn.addEventListener('click', ()=>{ renderHistory(); historyModal.classList.add('show'); });
+    closeHistoryBtn.addEventListener('click', ()=> historyModal.classList.remove('show'));
+    clearHistoryBtn.addEventListener('click', ()=>{ history.length=0; renderHistory(); });
+
+    // Lanzamiento
+    const ROLL_TIME = 420;  // ms por dado (ágil)
+    const FADE_TIME = 120;  // ms fade sprite
+
+    btnRoll.addEventListener('click', doRoll);
+    btnAgain.addEventListener('click', ()=>{ modal.classList.remove('show'); doRoll(); });
+    btnClose.addEventListener('click', ()=> modal.classList.remove('show'));
+    copyBtn.addEventListener('click', ()=>{ const text = buildPlainTextResult(); navigator.clipboard.writeText(text).catch(()=>{}); });
+
+    async function doRoll(){
+      const queue = buildQueue(); if (!queue.length) return;
+      btnRoll.disabled = true;
+
+      if (repeatCount===1){
+        const results = [];
+        for (const item of queue){ await animateOnCard(item.key); results.push( rollOne(item) ); }
+        btnRoll.disabled = false; seriesTotals=[]; showResults(queue, results, /*runIndex*/1, /*runs*/1);
+      } else {
+        // 1ª tirada animada
+        seriesTotals = [];
+        const results1 = [];
+        for (const item of queue){ await animateOnCard(item.key); results1.push( rollOne(item) ); }
+        showResults(queue, results1, 1, repeatCount, /*append*/false);
+        // resto sin animar (rápido)
+        for (let r=2; r<=repeatCount; r++){
+          const results = queue.map(item=> rollOne(item));
+          showResults(queue, results, r, repeatCount, /*append*/true);
+        }
+        btnRoll.disabled = false;
+      }
+      // vibración al mostrar resultados
+      try{ if (navigator.vibrate) navigator.vibrate([20,10,20]); }catch(_){ }
+    }
+
+    function buildQueue(){ const q = []; for (const d of DICE){ const n=state[d.key]||0; for(let i=0;i<n;i++) q.push({key:d.key,sides:d.sides}); } return q; }
+
+    function resetCounts(){ const o={}; for(const d of DICE){ o[d.key]=0; } return o; }
+
+    // RNG sin sesgo
+    function randInt(n){
+      if (window.crypto && window.crypto.getRandomValues){
+        const buf = new Uint32Array(1);
+        const max = Math.floor(0xFFFFFFFF / n) * n;
+        let x; do { window.crypto.getRandomValues(buf); x = buf[0]; } while (x >= max);
+        return 1 + (x % n);
+      }
+      return 1 + Math.floor(Math.random()*n);
+    }
+
+    function rollOne(item){
+      const s = item.sides;
+      // D20 con ventaja/desventaja
+      if (item.key==='d20' && advMode!=='normal'){
+        const a = coreRoll(s); const b = coreRoll(s);
+        const chosen = advMode==='adv'? Math.max(a.value,b.value): Math.min(a.value,b.value);
+        return {key:'d20', sides:s, pair:[a.value,b.value], chosen, advMode, rolls:[a, b]};
+      }
+      return coreRoll(s, item.key);
+    }
+
+    function coreRoll(sides, key){
+      let total = randInt(sides);
+      const parts = [total];
+      // Re-roll 1s (una vez)
+      if (rerollOnes && total===1){ const r = randInt(sides); parts.push(r); total = r; }
+      // Exploding (mientras sea máximo)
+      if (explodeMax){ while (total===sides){ const r = randInt(sides); parts.push(r); total += r; if (r!==sides) break; } }
+      return {key: key||('d'+sides), sides, val: total, parts};
+    }
+
+    function animateOnCard(key){
+      return new Promise((resolve)=>{
+        const icon = document.querySelector(`.icon[data-key='${key}']`); if(!icon) return resolve();
+        const card = icon.closest('.card'); card.classList.add('active');
+        const base = icon.querySelector('img.base'); if (base) base.style.opacity='0';
+        const spr = document.createElement('div'); spr.className='sprite spin';
+        const img = document.createElement('img'); const conf = SPRITES[key];
+        img.src = conf && conf.roll ? conf.roll : fallbackRollData();
+        spr.appendChild(img); icon.appendChild(spr);
+        playRattle(ROLL_TIME);
+        setTimeout(()=>{
+          spr.classList.add('fadeout');
+          setTimeout(()=>{ spr.remove(); if (base) base.style.opacity='1'; card.classList.remove('active'); resolve(); }, FADE_TIME);
+        }, ROLL_TIME);
+      });
+    }
+
+    function computeSuccesses(results){
+      if (succMode==='none') return null;
+      let succ = 0;
+      for (const r of results){
+        let val;
+        if (r.key==='d20' && r.pair) val = r.chosen; else val = r.val;
+        if (succMode==='ge' && val>=succTarget) succ++;
+        if (succMode==='le' && val<=succTarget) succ++;
+      }
+      return succ;
+    }
+
+    function showResults(queue, results, runIndex=1, runs=1, append=false){
+      // Suma por tipo y global
+      const byType = {}; let sum = 0;
+      for (const r of results){ const k=r.key; byType[k]=byType[k]||[]; if(k==='d20'&&r.pair){byType[k].push(r); sum+=r.chosen;} else {byType[k].push(r.val); sum+=r.val;} }
+      const succ = computeSuccesses(results);
+      const finalTotal = sum + mod;
+
+      // Cabecera
+      const diceCount = queue.length;
+      totalEl.textContent = runs>1 ? `Serie ${runIndex}/${runs} — Total: ${finalTotal}` : `Total: ${finalTotal}`;
+      const bits = [`${diceCount} dado${diceCount!==1?'s':''}`];
+      if (mod) bits.push(`${mod>0?'+':''}${mod}`);
+      if (advMode!=='normal') bits.push(advMode==='adv'?'ventaja':'desventaja');
+      if (succ!==null) bits.push(`éxitos: ${succ}`);
+      badgeEl.textContent = bits.join(' · ');
+
+      // Detalle
+      if (!append){ resultList.innerHTML = ''; statsBox.style.display='none'; statsBox.innerHTML=''; }
+      if (runs===1){
+        const order = DICE.map(d=>d.key); const lines = [];
+        for (const k of order){ if(!byType[k]) continue; const sides=(DICE.find(d=>d.key===k)||{sides:parseInt(k.replace('d',''))}).sides; const label=`D${sides}`;
+          if(k==='d20'&&advMode!=='normal'){
+            const parts=byType[k].map(o=>`(${o.pair[0]}, ${o.pair[1]}) → <strong class=\"${o.chosen===20?'crit':o.chosen===1?'fail':''}\">${o.chosen}</strong>`);
+            const subtotal=byType[k].reduce((a,b)=>a+b.chosen,0);
+            lines.push(`<div class=\"line\"><div>${label} (${parts.length}) ${advMode==='adv'?'con ventaja':'con desventaja'}:</div><div>${parts.join(' + ')} = <strong>${subtotal}</strong></div></div>`);
+          } else {
+            const arr = byType[k];
+            const subtotal = arr.reduce((a,b)=>a+b,0);
+            lines.push(`<div class=\"line\"><div>${label} (${arr.length}):</div><div>${arr.join(' + ')} = <strong>${subtotal}</strong></div></div>`);
+          }
+        }
+        if (mod){ lines.push(`<div class=\"line\"><div>Modificador:</div><div>${mod>0?'+':''}${mod}</div></div>`); }
+        if (succ!==null){ lines.push(`<div class=\"line\"><div>Éxitos (${succMode==='ge'?'≥':'≤'} ${succTarget}):</div><div><strong>${succ}</strong></div></div>`); }
+        resultList.innerHTML = lines.join('');
+      } else {
+        // Runs > 1: lista de resultados + estadísticas si procede
+        const line = document.createElement('div'); line.className='line';
+        line.innerHTML = `<div>Tirada ${runIndex} ${succ!==null?`· éxitos: <strong>${succ}</strong>`:''}</div><div><strong>${finalTotal}</strong></div>`;
+        resultList.appendChild(line);
+        // acumular y pintar stats
+        seriesTotals.push(finalTotal);
+        if (showStats) renderStats(seriesTotals);
+      }
+
+      if (!append) modal.classList.add('show');
+
+      // Historial (guardar solo primera tirada de la serie o tirada única)
+      if (!append){
+        history.unshift({ time:new Date().toLocaleString(), summary:getSelectionSummary(), mod, advMode, total:finalTotal, succ });
+      }
+    }
+
+    function renderStats(totals){
+      if (!totals || totals.length===0) return;
+      const min = Math.min(...totals);
+      const max = Math.max(...totals);
+      const mean = (totals.reduce((a,b)=>a+b,0)/totals.length).toFixed(2);
+      const bins = Math.min(10, Math.max(5, Math.floor(Math.sqrt(totals.length))));
+      const span = Math.max(1, max - min + 1);
+      const step = Math.max(1, Math.floor(span / bins));
+      const counts = new Array(bins).fill(0);
+      for (const v of totals){
+        let idx = Math.floor((v - min) / step);
+        if (idx >= bins) idx = bins - 1;
+        counts[idx]++;
+      }
+      const maxCount = Math.max(...counts);
+      const rows = counts.map((c,i)=>{
+        const a = min + i*step;
+        const b = (i===bins-1) ? max : (min + (i+1)*step - 1);
+        const w = maxCount? Math.round(c/maxCount*100) : 0;
+        return `<div class=\"histRow\"><div class=\"muted\">${a}–${b}</div><div class=\"bar\" style=\"width:${w}%\"></div><div class=\"muted\">${c}</div></div>`;
+      }).join('');
+      statsBox.style.display='block';
+      statsBox.innerHTML = `
+        <div class=\"statsHeader\">
+          <div class=\"chip\">Mín: <strong>${min}</strong></div>
+          <div class=\"chip\">Media: <strong>${mean}</strong></div>
+          <div class=\"chip\">Máx: <strong>${max}</strong></div>
+          <div class=\"chip\">Muestras: <strong>${totals.length}</strong></div>
+        </div>
+        <div class=\"hist\">${rows}</div>
+      `;
+    }
+
+    function getSelectionSummary(){
+      const arr = DICE.filter(d=>state[d.key]>0).map(d=>`${state[d.key]}×${d.label}`);
+      const modTxt = mod? (mod>0?` + ${mod}`:` − ${Math.abs(mod)}`):'';
+      const advTxt = advMode==='adv'? ' · ventaja' : advMode==='dis'? ' · desventaja':'';
+      const succTxt = succMode==='none'? '' : ` · éxitos: ${succMode==='ge'?'≥':'≤'} ${succTarget}`;
+      return (arr.join(' · ')||'—') + modTxt + advTxt + succTxt;
+    }
+
+    function renderHistory(){
+      histCount.textContent = `${history.length}`;
+      if (!history.length){ historyList.innerHTML = '<div class="muted">Sin tiradas aún.</div>'; return; }
+      historyList.innerHTML = history.map(h=>`<div class="line"><div><strong>${h.time}</strong><br/><span class="muted">${h.summary}</span></div><div><strong>${h.total}</strong>${h.succ!=null?` · éxitos: ${h.succ}`:''}</div></div>`).join('');
+    }
+
+    // ===== Fallbacks =====
+    function fallbackIconData(key){
+      const colors = { d2:'#f59e0b', d4:'#2563eb', d6:'#eab308', d8:'#10b981', d10:'#9333ea', d12:'#84cc16', d20:'#ef4444', d100:'#8b5cf6' };
+      const c = colors[key]||'#38bdf8';
+      const shape = key==='d6' ? 'square' : (key==='d4'?'tri':'poly');
+      let svg='';
+      if (shape==='square') svg = `<svg viewBox='0 0 100 100' xmlns='http://www.w3.org/2000/svg'><rect x='16' y='16' width='68' height='68' rx='14' fill='${c}'/></svg>`;
+      else if (shape==='tri') svg = `<svg viewBox='0 0 100 100' xmlns='http://www.w3.org/2000/svg'><polygon points='50,14 86,86 14,86' fill='${c}'/></svg>`;
+      else svg = `<svg viewBox='0 0 100 100' xmlns='http://www.w3.org/2000/svg'><polygon points='50,12 86,38 74,84 26,84 14,38' fill='${c}'/></svg>`;
+      return 'data:image/svg+xml;charset=utf-8,' + encodeURIComponent(svg);
+    }
+    function fallbackRollData(){
+      const svg = `<svg viewBox='0 0 100 100' xmlns='http://www.w3.org/2000/svg'>
+        <circle cx='50' cy='50' r='36' fill='none' stroke='#ffffff' stroke-width='6' stroke-linecap='round'>
+          <animateTransform attributeName='transform' type='rotate' from='0 50 50' to='360 50 50' dur='0.45s' repeatCount='indefinite'/>
+        </circle>
+      </svg>`;
+      return 'data:image/svg+xml;charset=utf-8,' + encodeURIComponent(svg);
     }
 
     function cardHTML(d){
@@ -303,111 +660,13 @@
       const totalDice = DICE.reduce((acc,d)=>acc+(state[d.key]||0),0);
       const modTxt = mod? (mod>0?` + ${mod}`:` − ${Math.abs(mod)}`):'';
       const advTxt = advMode==='adv'? ' · ventaja' : advMode==='dis'? ' · desventaja':'';
-      summary.textContent = arr.length? arr.join(' · ') + modTxt + advTxt : 'Sin dados seleccionados.';
+      const succTxt = succMode==='none'? '' : ` · éxitos: ${succMode==='ge'?'≥':'≤'} ${succTarget}`;
+      summary.textContent = arr.length? arr.join(' · ') + modTxt + advTxt + succTxt : 'Sin dados seleccionados.';
       btnRoll.disabled = totalDice===0; modVal.textContent = mod;
-    }
-
-    // ===== Lanzamiento rápido con resalte y sin "doble imagen" =====
-    const ROLL_TIME = 650;  // ms por dado
-    const FADE_TIME = 160;  // ms fade sprite
-
-    btnRoll.addEventListener('click', doRoll);
-    btnAgain.addEventListener('click', ()=>{ modal.classList.remove('show'); doRoll(); });
-    btnClose.addEventListener('click', ()=> modal.classList.remove('show'));
-
-    async function doRoll(){
-      const queue = buildQueue(); if (!queue.length) return;
-      btnRoll.disabled = true;
-      const results = [];
-      for (const item of queue){
-        await animateOnCard(item.key);
-        results.push( rollOne(item) );
-      }
-      btnRoll.disabled = false;
-      showResults(queue, results);
-    }
-
-    function buildQueue(){
-      const q = []; for (const d of DICE){ const n=state[d.key]||0; for(let i=0;i<n;i++) q.push({key:d.key,sides:d.sides}); }
-      return q;
-    }
-
-    function rollOne(item){
-      if (item.key==='d20' && advMode!=='normal'){
-        const a = 1+Math.floor(Math.random()*20);
-        const b = 1+Math.floor(Math.random()*20);
-        const chosen = advMode==='adv'? Math.max(a,b): Math.min(a,b);
-        return {key:'d20', sides:20, pair:[a,b], chosen, advMode};
-      }
-      return {key:item.key, sides:item.sides, val: 1+Math.floor(Math.random()*item.sides)};
-    }
-
-    function animateOnCard(key){
-      return new Promise((resolve)=>{
-        const icon = document.querySelector(`.icon[data-key='${key}']`); if(!icon) return resolve();
-        const card = icon.closest('.card'); card.classList.add('active');
-        const base = icon.querySelector('img.base'); base && (base.style.opacity='0');
-        const spr = document.createElement('div'); spr.className='sprite spin';
-        const img = document.createElement('img'); const conf = SPRITES[key];
-        img.src = conf && conf.roll ? conf.roll : fallbackRollData();
-        spr.appendChild(img); icon.appendChild(spr);
-        setTimeout(()=>{
-          spr.classList.add('fadeout');
-          setTimeout(()=>{ spr.remove(); base && (base.style.opacity='1'); card.classList.remove('active'); resolve(); }, FADE_TIME);
-        }, ROLL_TIME);
-      });
-    }
-
-    function showResults(queue, results){
-      const byType = {}; let sum = 0;
-      for (const r of results){ const k=r.key; byType[k]=byType[k]||[]; if(k==='d20'&&r.pair){byType[k].push(r); sum+=r.chosen;} else {byType[k].push(r.val); sum+=r.val;} }
-      const finalTotal = sum + mod;
-      totalEl.textContent = `Total: ${finalTotal}`;
-      const diceCount = queue.length;
-      badgeEl.textContent = `${diceCount} dado${diceCount!==1?'s':''}${mod? (mod>0?` · +${mod}`:` · ${mod}`):''}${advMode!=='normal'?` · ${advMode==='adv'?'ventaja':'desventaja'}`:''}`;
-      const order = DICE.map(d=>d.key); const lines = [];
-      for (const k of order){ if(!byType[k]) continue; const sides=DICE.find(d=>d.key===k).sides; const label=`D${sides}`;
-        if(k==='d20'&&advMode!=='normal'){ const parts=byType[k].map(o=>`(${o.pair[0]}, ${o.pair[1]}) → <strong>${o.chosen}</strong>`); const subtotal=byType[k].reduce((a,b)=>a+b.chosen,0); lines.push(`<div class="line"><div>${label} (${parts.length}) ${advMode==='adv'?'con ventaja':'con desventaja'}:</div><div>${parts.join(' + ')} = <strong>${subtotal}</strong></div></div>`); }
-        else { const arr=byType[k]; const subtotal=arr.reduce((a,b)=>a+b,0); lines.push(`<div class="line"><div>${label} (${arr.length}):</div><div>${arr.join(' + ')} = <strong>${subtotal}</strong></div></div>`); }
-      }
-      if (mod){ lines.push(`<div class="line"><div>Modificador:</div><div>${mod>0?'+':''}${mod}</div></div>`); }
-      resultList.innerHTML = lines.join(''); modal.classList.add('show');
-
-      // Historial
-      history.unshift({ time:new Date().toLocaleString(), summary:getSelectionSummary(), mod, advMode, total:finalTotal });
-    }
-
-    function getSelectionSummary(){
-      const arr = DICE.filter(d=>state[d.key]>0).map(d=>`${state[d.key]}×${d.label}`);
-      const modTxt = mod? (mod>0?` + ${mod}`:` − ${Math.abs(mod)}`):'';
-      const advTxt = advMode==='adv'? ' · ventaja' : advMode==='dis'? ' · desventaja':'';
-      return (arr.join(' · ')||'—') + modTxt + advTxt;
-    }
-
-    function renderHistory(){
-      histCount.textContent = `${history.length}`;
-      if (!history.length){ historyList.innerHTML = '<div class="muted">Sin tiradas aún.</div>'; return; }
-      historyList.innerHTML = history.map(h=>`<div class="line"><div><strong>${h.time}</strong><br/><span class="muted">${h.summary}</span></div><div><strong>${h.total}</strong></div></div>`).join('');
-    }
-
-    // ===== Fallbacks =====
-    function fallbackIconData(key){
-      const colors = { d2:'#f59e0b', d4:'#2563eb', d6:'#eab308', d8:'#10b981', d10:'#9333ea', d12:'#84cc16', d20:'#ef4444', d100:'#8b5cf6' };
-      const c = colors[key]||'#38bdf8';
-      const shape = key==='d6' ? 'square' : (key==='d4'?'tri':'poly');
-      let svg='';
-      if (shape==='square') svg = `<svg viewBox='0 0 100 100' xmlns='http://www.w3.org/2000/svg'><rect x='16' y='16' width='68' height='68' rx='14' fill='${c}'/></svg>`;
-      else if (shape==='tri') svg = `<svg viewBox='0 0 100 100' xmlns='http://www.w3.org/2000/svg'><polygon points='50,14 86,86 14,86' fill='${c}'/></svg>`;
-      else svg = `<svg viewBox='0 0 100 100' xmlns='http://www.w3.org/2000/svg'><polygon points='50,12 86,38 74,84 26,84 14,38' fill='${c}'/></svg>`;
-      return 'data:image/svg+xml;charset=utf-8,' + encodeURIComponent(svg);
-    }
-    function fallbackRollData(){
-      const svg = `<svg viewBox='0 0 100 100' xmlns='http://www.w3.org/2000/svg'>
-        <circle cx='50' cy='50' r='36' fill='none' stroke='#ffffff' stroke-width='6' stroke-linecap='round'>
-          <animateTransform attributeName='transform' type='rotate' from='0 50 50' to='360 50 50' dur='0.5s' repeatCount='indefinite'/>
-        </circle>
-      </svg>`;
-      return 'data:image/svg+xml;charset=utf-8,' + encodeURIComponent(svg);
+      repVal.textContent = repeatCount;
+      succTargetInp.disabled = (succMode==='none'); succTargetInp.value = succTarget;
+      rerollOnesChk.checked = rerollOnes; explodeMaxChk.checked = explodeMax; succModeSel.value = succMode;
+      showStatsChk.checked = showStats;
     }
 
     // ===== Arranque =====
