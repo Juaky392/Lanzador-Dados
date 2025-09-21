@@ -51,11 +51,18 @@
     .btnPrimary{appearance:none;border:none;background:var(--accent);color:#0b1220;font-weight:800;padding:12px 16px;border-radius:14px;box-shadow:0 10px 24px #0008;cursor:pointer}
     .btnPrimary:disabled{opacity:.5;cursor:not-allowed}
 
-    /* roll stage */
-    .stage{margin-top:12px;display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:8px}
-    .die{background:#0b1220;border:1px solid #ffffff22;border-radius:12px;min-height:72px;display:grid;place-items:center;font-weight:900;font-size:24px}
-    .rolling{animation:spin .7s linear infinite}
-    @keyframes spin{from{transform:rotate(0)}to{transform:rotate(360deg)}}
+    /* ====== ESCENARIO / DADOS 3D ====== */
+    .stage{margin-top:12px;display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:8px;perspective:900px}
+    .dieCell{background:#0b1220;border:1px solid #ffffff22;border-radius:12px;min-height:86px;display:grid;place-items:center;overflow:hidden}
+    .die3d{width:76px;height:76px;display:grid;place-items:center;border-radius:12px;background:linear-gradient(145deg,#0f172a,#0a1222);
+      border:1px solid #ffffff22;transform-style:preserve-3d}
+    .face{font-weight:900;font-size:26px;color:#fff;text-shadow:0 2px 8px #0008}
+
+    .rolling{animation:rollSpin .85s cubic-bezier(.2,.7,.2,1) both}
+    @keyframes rollSpin{
+      0%{transform:rotateX(0deg) rotateY(0deg) scale(1)}
+      100%{transform:rotateX(720deg) rotateY(540deg) scale(1.02)}
+    }
 
     /* modal */
     .modal{position:fixed;inset:0;background:#0009;display:none;align-items:center;justify-content:center;z-index:40}
@@ -78,7 +85,7 @@
       <div class="hdr">
         <div>
           <div class="title">Lanzador de dados – Dungeons & Dragons</div>
-          <div class="subtitle">Elige tus dados y lanza. Animación corta y resultado total.</div>
+          <div class="subtitle">Elige tus dados y lánzalos. Animación 3D secuencial + suma total.</div>
         </div>
         <div class="muted" id="selCounter">0 seleccionados</div>
       </div>
@@ -89,7 +96,7 @@
         <!-- Selector de dados -->
         <div class="grid" id="diceGrid"></div>
 
-        <!-- Escenario de tirada (se llena al pulsar lanzar) -->
+        <!-- Escenario de tirada (se rellena al lanzar) -->
         <div class="stage" id="stage"></div>
       </div>
     </main>
@@ -220,54 +227,51 @@
       return pts.join(' ');
     }
 
-    // --- Rolling ---
+    // --- Rolling 3D secuencial ---
     btnRoll.addEventListener('click', doRoll);
     btnAgain.addEventListener('click', ()=>{ modal.classList.remove('show'); doRoll(); });
     btnClose.addEventListener('click', ()=> modal.classList.remove('show'));
 
-    function doRoll(){
+    async function doRoll(){
       const set = [];
-      for (const d of DICE){
-        for(let i=0;i<state[d.key];i++) set.push({key:d.key,sides:d.sides});
+      for (const d of DICE){ for(let i=0;i<state[d.key];i++) set.push({key:d.key,sides:d.sides}); }
+      if (!set.length) return;
+      // Render tiles
+      stage.innerHTML = set.map(()=>`<div class="dieCell"><div class="die3d"><div class="face">–</div></div></div>`).join('');
+      const cells = Array.from(stage.querySelectorAll('.dieCell'));
+      const results = [];
+      btnRoll.disabled = true;
+      // Secuencial: de 1 en 1, 1 segundo aprox cada uno
+      for (let i=0;i<cells.length;i++){
+        const res = await rollOne(cells[i], set[i].sides);
+        results.push(res);
       }
-      // stage tiles
-      stage.innerHTML = set.map(()=>`<div class="die rolling">–</div>`).join('');
-      // vibra corto
-      if (navigator.vibrate){ try{ navigator.vibrate(30); }catch(e){} }
+      btnRoll.disabled = false;
+      showResults(set, results);
+    }
 
-      // quick anim showing random faces
-      const tiles = Array.from(stage.children);
-      const t0 = performance.now();
-      const anim = setInterval(()=>{
-        for (let i=0;i<tiles.length;i++){
-          const s = set[i].sides;
-          tiles[i].textContent = 1 + Math.floor(Math.random()*s);
-        }
-      }, 70);
-
-      setTimeout(()=>{
-        clearInterval(anim);
-        // final results
-        const results = set.map(d=> 1 + Math.floor(Math.random()*d.sides));
-        for (let i=0;i<tiles.length;i++){
-          tiles[i].classList.remove('rolling');
-          tiles[i].textContent = results[i];
-        }
-        showResults(set, results);
-      }, 1100);
+    function rollOne(cell, sides){
+      return new Promise(resolve=>{
+        const die = cell.querySelector('.die3d');
+        const face = cell.querySelector('.face');
+        die.classList.add('rolling');
+        const t = setInterval(()=>{ face.textContent = 1 + Math.floor(Math.random()*sides); }, 70);
+        const final = 1 + Math.floor(Math.random()*sides);
+        setTimeout(()=>{
+          clearInterval(t);
+          die.classList.remove('rolling');
+          face.textContent = final;
+          resolve(final);
+        }, 950); // ~1s por dado
+      });
     }
 
     function showResults(set, results){
       const sum = results.reduce((a,b)=>a+b,0);
       totalEl.textContent = `Total: ${sum}`;
-      // badge: número de dados
       badgeEl.textContent = `${results.length} dado${results.length!==1?'s':''}`;
-
-      // breakdown por tipo
       const byType = new Map();
-      for (let i=0;i<set.length;i++){
-        const k=set[i].key; if(!byType.has(k)) byType.set(k,[]); byType.get(k).push(results[i]);
-      }
+      for (let i=0;i<set.length;i++){ const k=set[i].key; if(!byType.has(k)) byType.set(k,[]); byType.get(k).push(results[i]); }
       const order = DICE.map(d=>d.key);
       const lines = [];
       for (const k of order){
@@ -279,7 +283,6 @@
         lines.push(`<div class="line"><div>${label} (${arr.length}):</div><div>${arr.join(' + ')} = <strong>${subtotal}</strong></div></div>`);
       }
       resultList.innerHTML = lines.join('');
-
       modal.classList.add('show');
     }
 
