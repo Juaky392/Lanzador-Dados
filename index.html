@@ -33,6 +33,7 @@
     .seg button.active{background:var(--accent);color:#03202a;font-weight:800}
     .ghost{appearance:none;border:1px solid #ffffff33;background:transparent;color:#e5e7eb;border-radius:10px;padding:8px 10px;cursor:pointer}
     .primary{appearance:none;border:none;background:var(--accent);color:#03202a;font-weight:800;padding:10px 12px;border-radius:10px;cursor:pointer}
+    .danger{appearance:none;border:1px solid #ff6b6b;background:transparent;color:#ffb4b4;border-radius:10px;padding:8px 10px;cursor:pointer}
 
     /* Opciones avanzadas (colapsable) */
     .advToggle{display:inline-flex;gap:8px;align-items:center}
@@ -86,9 +87,11 @@
 
     /* Stats */
     .statsBox{margin-top:10px;padding-top:8px;border-top:1px dashed #ffffff22}
+    .statsSection{margin-top:8px}
+    .statsTitle{color:#e5e7eb;font-weight:800;margin-bottom:4px}
     .statsHeader{display:flex;gap:12px;flex-wrap:wrap;color:#e5e7eb}
     .statsHeader .chip{background:#0b1220;border:1px solid #ffffff22;border-radius:999px;padding:4px 10px;font-weight:700}
-    .hist{margin-top:10px;display:grid;gap:6px}
+    .hist{margin-top:8px;display:grid;gap:6px}
     .histRow{display:grid;grid-template-columns:80px 1fr 50px;gap:8px;align-items:center}
     .histRow .bar{height:10px;background:linear-gradient(90deg,#22d3ee,#a78bfa);border-radius:999px}
 
@@ -166,10 +169,10 @@
             <input id="customSides" type="number" min="2" max="100" placeholder="Caras (p.ej. 7)" />
             <button class="ghost" id="addCustom">Añadir</button>
           </div>
-          <!-- Toggle estadísticas -->
-          <div class="field">
-            <label><input type="checkbox" id="showStats"> Mostrar estadísticas</label>
-          </div>
+          <!-- Stats toggle + Export + Reset -->
+          <div class="field"><label><input type="checkbox" id="showStats"> Mostrar estadísticas</label></div>
+          <button class="ghost" id="exportHistory">Exportar historial</button>
+          <button class="danger" id="resetAll">Restablecer</button>
         </div>
       </div>
     </header>
@@ -231,7 +234,7 @@
       {key:'d10', sides:10, label:'D10'},
       {key:'d12', sides:12, label:'D12'},
       {key:'d20', sides:20, label:'D20'},
-      {key:'d100',sides:100,label:'D100'},
+      {key:'d100',sides:100, label:'D100'},
     ];
 
     const SPRITES = {
@@ -246,7 +249,7 @@
     };
 
     // ===== Estado =====
-    const DICE = [...DICE_BASE];
+    let DICE = [...DICE_BASE];
     const state = Object.fromEntries(DICE.map(d=>[d.key,0]));
     let mod = 0; // modificador
     let advMode = 'normal'; // 'normal' | 'adv' | 'dis'
@@ -262,6 +265,7 @@
 
     // Series (para estadísticas de runs)
     let seriesTotals = [];
+    let seriesSuccs = [];
 
     // ===== Audio (traqueteo) =====
     let audioCtx = null;
@@ -331,6 +335,8 @@
     const addCustomBtn = document.getElementById('addCustom');
 
     const showStatsChk = document.getElementById('showStats');
+    const exportHistoryBtn = document.getElementById('exportHistory');
+    const resetAllBtn = document.getElementById('resetAll');
 
     // ===== Render inicial =====
     renderGrid();
@@ -397,7 +403,7 @@
     succTargetInp.addEventListener('change', ()=>{ succTarget = Math.max(1, Math.min(100, parseInt(succTargetInp.value||10))); succTargetInp.value = succTarget; });
     rerollOnesChk.addEventListener('change', ()=>{ rerollOnes = rerollOnesChk.checked; });
     explodeMaxChk.addEventListener('change', ()=>{ explodeMax = explodeMaxChk.checked; });
-    showStatsChk.addEventListener('change', ()=>{ showStats = showStatsChk.checked; });
+    showStatsChk.addEventListener('change', ()=>{ showStats = showStatsChk.checked; if (!showStats) {statsBox.style.display='none'; statsBox.innerHTML='';} });
 
     addCustomBtn.addEventListener('click', ()=>{
       const n = parseInt(customSidesInp.value||0);
@@ -412,6 +418,36 @@
         state[key] = (state[key]||0)+1; updateUI();
       }
       customSidesInp.value='';
+    });
+
+    // Exportar historial (CSV)
+    exportHistoryBtn.addEventListener('click', ()=>{
+      if (!history.length){ alert('No hay historial para exportar.'); return; }
+      const header = ['fecha','resumen','mod','modo','total','exitos'];
+      const rows = history.map(h=>[h.time, h.summary.replaceAll(',',';'), h.mod, h.advMode, h.total, (h.succ!=null?h.succ:'')]);
+      const csv = [header.join(','), ...rows.map(r=>r.join(','))].join('
+');
+      const blob = new Blob([csv], {type:'text/csv;charset=utf-8;'});
+      const url = URL.createObjectURL(blob);
+      const a = document.createElement('a'); a.href = url; a.download = 'historial_dados.csv'; a.click();
+      setTimeout(()=>URL.revokeObjectURL(url), 3000);
+    });
+
+    // Restablecer todo
+    resetAllBtn.addEventListener('click', ()=>{
+      if (!confirm('¿Seguro que quieres restablecer todo a valores por defecto? Esto borrará presets, historial, dados personalizados y ajustes.')) return;
+      try{ localStorage.removeItem('dyd_presets'); }catch(_){ }
+      // Reset runtime
+      DICE = [...DICE_BASE];
+      for (const k in state) delete state[k];
+      for (const d of DICE) state[d.key]=0;
+      mod = 0; advMode='normal'; repeatCount=1; succMode='none'; succTarget=10; rerollOnes=false; explodeMax=false; showStats=false;
+      seriesTotals=[]; seriesSuccs=[]; history.length=0;
+      // UI
+      renderGrid();
+      renderHistory();
+      advPanel.classList.remove('show');
+      alert('Restablecido.');
     });
 
     // Historial
@@ -435,10 +471,10 @@
       if (repeatCount===1){
         const results = [];
         for (const item of queue){ await animateOnCard(item.key); results.push( rollOne(item) ); }
-        btnRoll.disabled = false; seriesTotals=[]; showResults(queue, results, /*runIndex*/1, /*runs*/1);
+        btnRoll.disabled = false; seriesTotals=[]; seriesSuccs=[]; showResults(queue, results, /*runIndex*/1, /*runs*/1);
       } else {
         // 1ª tirada animada
-        seriesTotals = [];
+        seriesTotals = []; seriesSuccs = [];
         const results1 = [];
         for (const item of queue){ await animateOnCard(item.key); results1.push( rollOne(item) ); }
         showResults(queue, results1, 1, repeatCount, /*append*/false);
@@ -559,7 +595,8 @@
         resultList.appendChild(line);
         // acumular y pintar stats
         seriesTotals.push(finalTotal);
-        if (showStats) renderStats(seriesTotals);
+        if (succ!==null) seriesSuccs.push(succ);
+        if (showStats) renderStats(seriesTotals, seriesSuccs);
       }
 
       if (!append) modal.classList.add('show');
@@ -570,37 +607,60 @@
       }
     }
 
-    function renderStats(totals){
+    function renderStats(totals, succs){
       if (!totals || totals.length===0) return;
-      const min = Math.min(...totals);
-      const max = Math.max(...totals);
-      const mean = (totals.reduce((a,b)=>a+b,0)/totals.length).toFixed(2);
-      const bins = Math.min(10, Math.max(5, Math.floor(Math.sqrt(totals.length))));
+      statsBox.style.display='block';
+      const totalsStats = computeStats(totals);
+      const totalsHist = buildHistRows(totalsStats);
+
+      let succHtml = '';
+      if (succMode!=='none' && succs && succs.length){
+        const succStats = computeStats(succs);
+        succHtml = `
+          <div class=\"statsSection\">
+            <div class=\"statsTitle\">Éxitos</div>
+            <div class=\"statsHeader\">
+              <div class=\"chip\">Mín: <strong>${succStats.min}</strong></div>
+              <div class=\"chip\">Media: <strong>${succStats.mean.toFixed(2)}</strong></div>
+              <div class=\"chip\">Máx: <strong>${succStats.max}</strong></div>
+              <div class=\"chip\">Muestras: <strong>${succStats.n}</strong></div>
+            </div>
+            <div class=\"hist\">${buildHistRows(succStats)}</div>
+          </div>`;
+      }
+
+      statsBox.innerHTML = `
+        <div class=\"statsSection\">
+          <div class=\"statsTitle\">Totales</div>
+          <div class=\"statsHeader\">
+            <div class=\"chip\">Mín: <strong>${totalsStats.min}</strong></div>
+            <div class=\"chip\">Media: <strong>${totalsStats.mean.toFixed(2)}</strong></div>
+            <div class=\"chip\">Máx: <strong>${totalsStats.max}</strong></div>
+            <div class=\"chip\">Muestras: <strong>${totalsStats.n}</strong></div>
+          </div>
+          <div class=\"hist\">${totalsHist}</div>
+        </div>
+        ${succHtml}
+      `;
+    }
+
+    function computeStats(arr){
+      const n = arr.length; const min = Math.min(...arr); const max = Math.max(...arr); const mean = arr.reduce((a,b)=>a+b,0)/n;
+      const bins = Math.min(10, Math.max(5, Math.floor(Math.sqrt(n))));
       const span = Math.max(1, max - min + 1);
       const step = Math.max(1, Math.floor(span / bins));
       const counts = new Array(bins).fill(0);
-      for (const v of totals){
-        let idx = Math.floor((v - min) / step);
-        if (idx >= bins) idx = bins - 1;
-        counts[idx]++;
-      }
-      const maxCount = Math.max(...counts);
-      const rows = counts.map((c,i)=>{
-        const a = min + i*step;
-        const b = (i===bins-1) ? max : (min + (i+1)*step - 1);
+      for (const v of arr){ let idx = Math.floor((v - min) / step); if (idx >= bins) idx = bins - 1; counts[idx]++; }
+      return {n, min, max, mean, bins, minBase:min, step, counts};
+    }
+
+    function buildHistRows(stats){
+      const {bins, minBase, step, counts} = stats; const maxCount = Math.max(...counts);
+      return counts.map((c,i)=>{
+        const a = minBase + i*step; const b = (i===bins-1) ? (minBase + (i+1)*step - 1) : (minBase + (i+1)*step - 1);
         const w = maxCount? Math.round(c/maxCount*100) : 0;
         return `<div class=\"histRow\"><div class=\"muted\">${a}–${b}</div><div class=\"bar\" style=\"width:${w}%\"></div><div class=\"muted\">${c}</div></div>`;
       }).join('');
-      statsBox.style.display='block';
-      statsBox.innerHTML = `
-        <div class=\"statsHeader\">
-          <div class=\"chip\">Mín: <strong>${min}</strong></div>
-          <div class=\"chip\">Media: <strong>${mean}</strong></div>
-          <div class=\"chip\">Máx: <strong>${max}</strong></div>
-          <div class=\"chip\">Muestras: <strong>${totals.length}</strong></div>
-        </div>
-        <div class=\"hist\">${rows}</div>
-      `;
     }
 
     function getSelectionSummary(){
@@ -615,6 +675,13 @@
       histCount.textContent = `${history.length}`;
       if (!history.length){ historyList.innerHTML = '<div class="muted">Sin tiradas aún.</div>'; return; }
       historyList.innerHTML = history.map(h=>`<div class="line"><div><strong>${h.time}</strong><br/><span class="muted">${h.summary}</span></div><div><strong>${h.total}</strong>${h.succ!=null?` · éxitos: ${h.succ}`:''}</div></div>`).join('');
+    }
+
+    function buildPlainTextResult(){
+      const html = resultList.innerText.trim();
+      return `Tirada (${new Date().toLocaleString()}):
+${getSelectionSummary()}
+${html}`;
     }
 
     // ===== Fallbacks =====
