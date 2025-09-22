@@ -19,8 +19,8 @@
     .retro .glow{display:inline-block; padding:8px 10px; border-radius:10px; background:linear-gradient(90deg,#0ea5e9 0%,#22d3ee 40%,#a78bfa 100%); -webkit-background-clip:text; background-clip:text; color:transparent; text-shadow:0 0 18px #22d3ee55}
 
     /* ===== Pager ===== */
-    .pager{flex:1; display:flex; width:200vw; transform:translateX(0); transition:transform .25s ease; will-change:transform}
-    .screen{width:100vw; height:calc(100vh - 54px); overflow:auto; -webkit-overflow-scrolling:touch}
+    .pager{flex:1; display:flex; width:200vw; transform:translateX(0); transition:transform .25s ease; will-change:transform; touch-action:pan-y}
+    .screen{width:100vw; height:calc(100vh - 54px); overflow:auto; -webkit-overflow-scrolling:touch; overscroll-behavior-y:contain}
 
     /* ===== Screen: DADOS ===== */
     .wrap{max-width:1100px;margin:0 auto;padding:14px}
@@ -235,17 +235,39 @@
   (function(){
     // ===== Pager (navegación) =====
     const pager = document.getElementById('pager');
-    const appEl = document.getElementById('app');
     let page = 0; // 0: dados, 1: opciones
     function go(n){ page = Math.max(0, Math.min(1, n)); pager.style.transform = `translateX(${-page*100}vw)`; }
     document.getElementById('goOptions').addEventListener('click', ()=>go(1));
     document.getElementById('goDice').addEventListener('click', ()=>go(0));
 
-    // Gestos táctiles (swipe)
-    let sx=0, sy=0, moved=false;
-    appEl.addEventListener('touchstart', (e)=>{ if(e.touches.length!==1) return; sx=e.touches[0].clientX; sy=e.touches[0].clientY; moved=false; }, {passive:true});
-    appEl.addEventListener('touchmove', (e)=>{ if(!sx&&sx!==0) return; const dx=e.touches[0].clientX-sx; const dy=e.touches[0].clientY-sy; if (Math.abs(dx)>Math.abs(dy) && Math.abs(dx)>24){ e.preventDefault(); moved=true; } }, {passive:false});
-    appEl.addEventListener('touchend', (e)=>{ if(!moved) return; const dx=e.changedTouches[0].clientX-sx; if (dx<-60) go(1); else if (dx>60) go(0); sx=sy=0; moved=false; }, {passive:true});
+    // Gestos táctiles con Pointer Events + touch-action: pan-y
+    let startX=0, startY=0, tracking=false, moved=false;
+    pager.addEventListener('pointerdown', (e)=>{
+      if (e.pointerType!=='touch') return; // solo táctil
+      startX = e.clientX; startY = e.clientY; tracking = true; moved=false;
+    }, {passive:true});
+    pager.addEventListener('pointermove', (e)=>{
+      if (!tracking) return;
+      const dx = e.clientX - startX; const dy = e.clientY - startY;
+      // con touch-action: pan-y, no hace falta preventDefault para bloquear horizontal
+      if (Math.abs(dx) > Math.abs(dy) && Math.abs(dx) > 24) moved = true;
+    });
+    function endSwipe(e){
+      if (!tracking) return;
+      const dx = e.clientX - startX; const dy = e.clientY - startY;
+      if (moved && Math.abs(dx) > 60 && Math.abs(dx) > Math.abs(dy)){
+        if (dx < 0) go(1); else go(0);
+      }
+      tracking=false; moved=false;
+    }
+    pager.addEventListener('pointerup', endSwipe);
+    pager.addEventListener('pointercancel', ()=>{ tracking=false; moved=false; });
+
+    // Accesibilidad: flechas del teclado para probar en desktop
+    window.addEventListener('keydown', (e)=>{
+      if (e.key==='ArrowRight') go(1);
+      if (e.key==='ArrowLeft') go(0);
+    });
 
     // ===== Config =====
     const DICE_BASE = [
@@ -792,6 +814,12 @@ ${html}`;
       // 5) Render inicial: hay cards visibles
       const cards = document.querySelectorAll('.card');
       assert(cards.length === DICE_BASE.length, 'Se renderizan los cards iniciales');
+
+      // 6) Pager go() navega correctamente
+      const was = pager.style.transform;
+      go(1); const t1 = pager.style.transform.includes('-100');
+      go(0); const t0 = pager.style.transform.includes('0');
+      assert(t1 && t0, 'Pager go() mueve a pantallas 0/1');
 
       const report = document.createElement('pre');
       report.id = 'testReport';
