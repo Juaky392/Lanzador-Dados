@@ -17,8 +17,8 @@
     .retro .glow{display:inline-block; padding:8px 10px; border-radius:10px; background:linear-gradient(90deg,#0ea5e9 0%,#22d3ee 40%,#a78bfa 100%); -webkit-background-clip:text; background-clip:text; color:transparent; text-shadow:0 0 18px #22d3ee55}
 
     /* PAGER */
-    .pager{flex:1; display:flex; width:200vw; transform:translateX(0); transition:transform .25s ease; will-change:transform; touch-action: pan-y}
-    .screen{width:100vw; height:calc(100vh - 54px); overflow:auto; -webkit-overflow-scrolling:touch; overscroll-behavior-y:contain}
+    .pager{flex:1; display:flex; width:200vw; transform:translateX(0); transition:transform .25s ease; will-change:transform;}
+    .screen{width:100vw; height:calc(100vh - 54px); overflow:auto; -webkit-overflow-scrolling:touch; overscroll-behavior-y:contain; touch-action: pan-y}
 
     /* DADOS */
     .wrap{max-width:1100px;margin:0 auto;padding:14px}
@@ -43,7 +43,7 @@
     .qty button{appearance:none;border:none;background:#111827;color:#e5e7eb;border:1px solid #ffffff22;width:38px;height:38px;border-radius:12px;font-size:18px;font-weight:800;cursor:pointer}
     .qty .count{min-width:28px;text-align:center;font-weight:800}
 
-    .footerBar{position:sticky;bottom:0;background:var(--panel);backdrop-filter:blur(8px);border-top:1px solid #ffffff22}
+    .footerBar{position:sticky;bottom:0;background:var(--panel);backdrop-filter:blur(8px);border-top:1px solid #ffffff22;padding-bottom:env(safe-area-inset-bottom)}
     .footerWrap{max-width:1100px;margin:0 auto;padding:10px 14px;display:flex;gap:10px;align-items:center;justify-content:space-between}
     .summary{color:var(--muted)}
     .btnPrimary{appearance:none;border:none;background:var(--accent);color:#03202a;font-weight:800;padding:12px 16px;border-radius:14px;box-shadow:0 10px 24px #0008;cursor:pointer}
@@ -217,24 +217,34 @@
 
   <script>
   (function(){
-    // ===== Swipe: Pointer + Touch fallback =====
+    /* ==================== SWIPE ROBUSTO ==================== */
     const pager = document.getElementById('pager');
-    let startX=0, startY=0, moving=false, page=0; // 0 dados, 1 opciones
-    function go(n){ page=Math.max(0,Math.min(1,n)); pager.style.transform = 'translateX(' + (-page*100) + 'vw)'; }
+    let page=0; // 0: dados, 1: opciones
+    function go(n){ page=Math.max(0,Math.min(1,n)); pager.style.transform='translateX('+(-page*100)+'vw)'; }
     document.getElementById('goOptions').addEventListener('click',()=>go(1));
     document.getElementById('goDice').addEventListener('click',()=>go(0));
 
-    // Pointer Events
-    pager.addEventListener('pointerdown', e=>{ if(e.pointerType!=='touch') return; startX=e.clientX; startY=e.clientY; moving=true; }, {passive:true});
-    pager.addEventListener('pointerup', e=>{ if(!moving) return; const dx=e.clientX-startX, dy=e.clientY-startY; finishSwipe(dx,dy); moving=false; });
-    pager.addEventListener('pointercancel', ()=>{ moving=false; });
-    // Touch fallback
-    pager.addEventListener('touchstart', e=>{ if(e.touches.length!==1) return; startX=e.touches[0].clientX; startY=e.touches[0].clientY; moving=true; }, {passive:true});
-    pager.addEventListener('touchend', e=>{ if(!moving) return; const t=e.changedTouches[0]; const dx=t.clientX-startX, dy=t.clientY-startY; finishSwipe(dx,dy); moving=false; }, {passive:true});
+    // Adjunta swipe a cada pantalla, con preventDefault en horizontal
+    function attachSwipe(el, onLeft, onRight){
+      let sx=0, sy=0, swiping=false, locked=false;
+      el.addEventListener('touchstart', e=>{ if(e.touches.length!==1) return; const t=e.touches[0]; sx=t.clientX; sy=t.clientY; swiping=false; locked=false; }, {passive:true});
+      el.addEventListener('touchmove', e=>{
+        if(!e.touches || e.touches.length!==1) return; const t=e.touches[0]; const dx=t.clientX-sx; const dy=t.clientY-sy;
+        if(locked) return;
+        if(!swiping){ if(Math.abs(dx)>14 && Math.abs(dx)>Math.abs(dy)){ swiping=true; e.preventDefault(); } }
+        else { e.preventDefault(); }
+      }, {passive:false});
+      el.addEventListener('touchend', e=>{ if(locked) return; const t=e.changedTouches[0]; const dx=t.clientX-sx; const dy=t.clientY-sy; if(Math.abs(dx)>60 && Math.abs(dx)>Math.abs(dy)){ if(dx<0 && onLeft) onLeft(); if(dx>0 && onRight) onRight(); } swiping=false; locked=false; }, {passive:true});
 
-    function finishSwipe(dx,dy){ if(Math.abs(dx)>60 && Math.abs(dx)>Math.abs(dy)){ if(dx<0) go(1); else go(0); } }
+      // Pointer fallback (por si algún Android no emite touch*)
+      el.addEventListener('pointerdown', e=>{ if(e.pointerType!=='touch') return; sx=e.clientX; sy=e.clientY; swiping=false; locked=false; }, {passive:true});
+      el.addEventListener('pointermove', e=>{ if(e.pointerType!=='touch') return; const dx=e.clientX-sx; const dy=e.clientY-sy; if(!swiping){ if(Math.abs(dx)>14 && Math.abs(dx)>Math.abs(dy)){ swiping=true; } } }, {passive:true});
+      el.addEventListener('pointerup', e=>{ if(e.pointerType!=='touch') return; const dx=e.clientX-sx; const dy=e.clientY-sy; if(Math.abs(dx)>60 && Math.abs(dx)>Math.abs(dy)){ if(dx<0 && onLeft) onLeft(); if(dx>0 && onRight) onRight(); } swiping=false; locked=false; }, {passive:true});
+    }
+    attachSwipe(document.getElementById('screenDice'), ()=>go(1), null);
+    attachSwipe(document.getElementById('screenOptions'), null, ()=>go(0));
 
-    // ===== Config =====
+    /* ==================== CONFIG + ASSETS ==================== */
     const DICE_BASE = [
       {key:'d2',  sides:2,  label:'D2'},
       {key:'d4',  sides:4,  label:'D4'},
@@ -246,25 +256,32 @@
       {key:'d100',sides:100, label:'D100'},
     ];
 
-    // Usa fallbacks por defecto para evitar rutas rotas
-    const SPRITES = {}; // si añades assets, rellena como {d6:{icon:'...', roll:'...'}}
+    // ✅ Mapeo de sprites restaurado (usa tus roll.webp). Si no existen, cae a fallback SVG.
+    const SPRITES = {
+      d2:  { icon: 'assets/d2/die.png',  roll: 'assets/d2/roll.webp' },
+      d4:  { icon: 'assets/d4/die.png',  roll: 'assets/d4/roll.webp' },
+      d6:  { icon: 'assets/d6/die.png',  roll: 'assets/d6/roll.webp' },
+      d8:  { icon: 'assets/d8/die.png',  roll: 'assets/d8/roll.webp' },
+      d10: { icon: 'assets/d10/die.png', roll: 'assets/d10/roll.webp' },
+      d12: { icon: 'assets/d12/die.png', roll: 'assets/d12/roll.webp' },
+      d20: { icon: 'assets/d20/die.png', roll: 'assets/d20/roll.webp' },
+      d100:{ icon: 'assets/d100/die.png',roll: 'assets/d100/roll.webp' },
+    };
 
-    // ===== Estado =====
+    /* ==================== ESTADO ==================== */
     let DICE = [...DICE_BASE];
     const state = Object.fromEntries(DICE.map(d=>[d.key,0]));
     let mod = 0; let advMode = 'normal';
     const history = [];
-
-    // Avanzadas
     let repeatCount = 1; let succMode='none'; let succTarget=10; let rerollOnes=false; let explodeMax=false; let showStats=false;
     let seriesTotals=[]; let seriesSuccs=[];
 
-    // ===== Audio =====
+    /* ==================== AUDIO ==================== */
     let audioCtx=null; function getCtx(){ if(!audioCtx) audioCtx=new (window.AudioContext||window.webkitAudioContext)(); return audioCtx; }
     function clickAt(t){ const ctx=getCtx(); const o=ctx.createOscillator(); const g=ctx.createGain(); o.type='triangle'; o.frequency.setValueAtTime(100+Math.random()*200,t); g.gain.setValueAtTime(0.0001,t); g.gain.exponentialRampToValueAtTime(0.2,t+0.005); g.gain.exponentialRampToValueAtTime(0.0001,t+0.08); o.connect(g).connect(ctx.destination); o.start(t); o.stop(t+0.09); }
     function playRattle(ms=450){ try{ const ctx=getCtx(); const now=ctx.currentTime; const n=Math.max(6,Math.min(14,Math.round(ms/50))); for(let i=0;i<n;i++){ clickAt(now+i*(ms/1000)/n+Math.random()*0.02); } }catch(_){} }
 
-    // ===== UI refs =====
+    /* ==================== REF UI ==================== */
     const grid = document.getElementById('diceGrid');
     const btnRoll = document.getElementById('btnRoll');
     const summary = document.getElementById('summary');
@@ -311,7 +328,7 @@
     const exportHistoryBtn = document.getElementById('exportHistory');
     const resetAllBtn = document.getElementById('resetAll');
 
-    // ===== Render inicial =====
+    /* ==================== RENDER ==================== */
     function cardHTML(d){
       const files = SPRITES[d.key]||{}; const iconSrc = files.icon || fallbackIconData(d.key);
       return '<div class="card" data-type="'+d.key+'">\
@@ -326,9 +343,8 @@
     }
 
     function renderGrid(){
-      if(!grid){ console.error('diceGrid no encontrado'); return; }
-      // 🔧 FIX: unir con "\n" para evitar tokens inválidos
-      grid.innerHTML = DICE.map(cardHTML).join('\n');
+      grid.innerHTML = DICE.map(cardHTML).join('
+');
       for(const d of DICE){
         const minus = document.querySelector('[data-key="'+d.key+'"][data-action="dec"]');
         const plus  = document.querySelector('[data-key="'+d.key+'"][data-action="inc"]');
@@ -339,7 +355,7 @@
     }
     renderGrid();
 
-    // ===== Lógica de opciones =====
+    /* ==================== OPCIONES ==================== */
     modDec.addEventListener('click', ()=>{ mod--; updateUI(); });
     modInc.addEventListener('click', ()=>{ mod++; updateUI(); });
     advGroup.addEventListener('click', (e)=>{ if(e.target.tagName!=='BUTTON') return; advMode = e.target.dataset.mode; Array.from(advGroup.querySelectorAll('button')).forEach(b=>b.classList.toggle('active', b.dataset.mode===advMode)); updateUI(); });
@@ -360,10 +376,8 @@
 
     addCustomBtn.addEventListener('click', ()=>{ const n=parseInt(customSidesInp.value||0); if(!n||n<2||n>100) return; const key='d'+n; if(!DICE.find(d=>d.key===key)){ DICE.push({key, sides:n, label:'D'+n}); state[key]=0; SPRITES[key]={icon:'', roll:''}; renderGrid(); } else { state[key]=(state[key]||0)+1; updateUI(); } customSidesInp.value=''; });
 
-    exportHistoryBtn.addEventListener('click', ()=>{ if(!history.length){ alert('No hay historial para exportar.'); return; } const header=['fecha','resumen','mod','modo','total','exitos']; const rows=history.map(h=>[h.time, (h.summary||'').replace(/,/g,';'), h.mod, h.advMode, h.total, (h.succ!=null?h.succ:'')]);
-      // 🔧 FIX: unir con "\n" para CSV
-      const csv=[header.join(','), ...rows.map(r=>r.join(','))].join('\n');
-      const blob=new Blob([csv],{type:'text/csv;charset=utf-8;'}); const url=URL.createObjectURL(blob); const a=document.createElement('a'); a.href=url; a.download='historial_dados.csv'; a.click(); setTimeout(()=>URL.revokeObjectURL(url),3000); });
+    exportHistoryBtn.addEventListener('click', ()=>{ if(!history.length){ alert('No hay historial para exportar.'); return; } const header=['fecha','resumen','mod','modo','total','exitos']; const rows=history.map(h=>[h.time, (h.summary||'').replace(/,/g,';'), h.mod, h.advMode, h.total, (h.succ!=null?h.succ:'')]); const csv=[header.join(','), ...rows.map(r=>r.join(','))].join('
+'); const blob=new Blob([csv],{type:'text/csv;charset=utf-8;'}); const url=URL.createObjectURL(blob); const a=document.createElement('a'); a.href=url; a.download='historial_dados.csv'; a.click(); setTimeout(()=>URL.revokeObjectURL(url),3000); });
 
     resetAllBtn.addEventListener('click', ()=>{ if(!confirm('¿Seguro que quieres restablecer todo?')) return; try{localStorage.removeItem('dyd_presets');}catch(_){} DICE=[...DICE_BASE]; for(const k in state) delete state[k]; for(const d of DICE) state[d.key]=0; mod=0; advMode='normal'; repeatCount=1; succMode='none'; succTarget=10; rerollOnes=false; explodeMax=false; showStats=false; seriesTotals=[]; seriesSuccs=[]; history.length=0; renderGrid(); renderHistory(); go(0); alert('Restablecido.'); });
 
@@ -371,6 +385,7 @@
     closeHistoryBtn.addEventListener('click', ()=> historyModal.classList.remove('show'));
     clearHistoryBtn.addEventListener('click', ()=>{ history.length=0; renderHistory(); });
 
+    /* ==================== ROLL ==================== */
     const ROLL_TIME=420, FADE_TIME=120;
     btnRoll.addEventListener('click', doRoll);
     btnAgain.addEventListener('click', ()=>{ modal.classList.remove('show'); doRoll(); });
@@ -394,7 +409,7 @@
 
     function showResults(queue, results, runIndex=1, runs=1, append=false){ const byType={}; let sum=0; for(const r of results){ const k=r.key; byType[k]=byType[k]||[]; if(k==='d20'&&r.pair){ byType[k].push(r); sum+=r.chosen; } else { byType[k].push(r.val); sum+=r.val; } } const succ=computeSuccesses(results); const finalTotal=sum+mod; const diceCount=queue.length; totalEl.textContent = (runs>1?('Serie '+runIndex+'/'+runs+' — Total: '+finalTotal):('Total: '+finalTotal)); const bits=[diceCount+' dado'+(diceCount!==1?'s':'')]; if(mod) bits.push((mod>0?'+':'')+mod); if(advMode!=='normal') bits.push(advMode==='adv'?'ventaja':'desventaja'); if(succ!==null) bits.push('éxitos: '+succ); badgeEl.textContent = bits.join(' · ');
       if(!append){ resultList.innerHTML=''; statsBox.style.display='none'; statsBox.innerHTML=''; }
-      if(runs===1){ const order=DICE.map(d=>d.key); const lines=[]; for(const k of order){ if(!byType[k]) continue; const sides=(DICE.find(d=>d.key===k)||{sides:parseInt(k.replace('d',''))}).sides; const label='D'+sides; if(k==='d20'&&advMode!=='normal'){ const parts=byType[k].map(o=>'('+o.pair[0]+', '+o.pair[1]+') → <strong class="'+(o.chosen===20?'crit':(o.chosen===1?'fail':''))+'">'+o.chosen+'</strong>'); const subtotal=byType[k].reduce((a,b)=>a+b.chosen,0); lines.push('<div class="line"><div>'+label+' ('+parts.length+') '+(advMode==='adv'?'con ventaja':'con desventaja')+':</div><div>'+parts.join(' + ')+' = <strong>'+subtotal+'</strong></div></div>'); } else { const arr=byType[k]; const subtotal=arr.reduce((a,b)=>a+b,0); lines.push('<div class="line"><div>'+label+' ('+arr.length+'): </div><div>'+arr.join(' + ')+' = <strong>'+subtotal+'</strong></div></div>'); } } if(mod){ lines.push('<div class="line"><div>Modificador:</div><div>'+ (mod>0?'+':'') + mod +'</div></div>'); } if(succ!==null){ lines.push('<div class="line"><div>Éxitos ('+(succMode==='ge'?'≥':'≤')+' '+succTarget+'):</div><div><strong>'+succ+'</strong></div></div>'); } resultList.innerHTML = lines.join(''); } else { const line=document.createElement('div'); line.className='line'; line.innerHTML='<div>Tirada '+runIndex+(succ!==null?' · éxitos: <strong>'+succ+'</strong>':'')+'</div><div><strong>'+finalTotal+'</strong></div>'; resultList.appendChild(line); seriesTotals.push(finalTotal); if(succ!==null) seriesSuccs.push(succ); if(showStats) renderStats(seriesTotals, seriesSuccs); }
+      if(runs===1){ const order=DICE.map(d=>d.key); const lines=[]; for(const k of order){ if(!byType[k]) continue; const sides=(DICE.find(d=>d.key===k)||{sides:parseInt(k.replace('d',''))}).sides; const label='D'+sides; if(k==='d20'&&advMode!=='normal'){ const parts=byType[k].map(o=>'('+o.pair[0]+', '+o.pair[1]+') → <strong class="'+(o.chosen===20?'crit':(o.chosen===1?'fail':''))+'">'+o.chosen+'</strong>'); const subtotal=byType[k].reduce((a,b)=>a+b.chosen,0); lines.push('<div class="line"><div>'+label+' ('+parts.length+') '+(advMode==='adv'?'con ventaja':'con desventaja')+':</div><div>'+parts.join(' + ')+' = <strong>'+subtotal+'</strong></div></div>'); } else { const arr=byType[k]; const subtotal=arr.reduce((a,b)=>a+b,0); lines.push('<div class="line"><div>'+label+' ('+arr.length+'): </div><div>'+arr.join(' + ')+' = <strong>'+subtotal+'</strong></div></div>'); } } if(mod){ lines.push('<div class="line"><div>Modificador:</div><div>'+ (mod>0?'+':'') + mod +'</div></div>'); } if(succ!==null){ lines.push('<div class="line"><div>Éxitos ('+(succMode==='ge'?'≥':'≤')+' '+succTarget+'):</div><div><strong>'+succ+'</strong></div></div>'); } resultList.innerHTML = lines.join(''); } else { const line=document.createElement('div'); line.className='line'; line.innerHTML='<div>Tirada '+runIndex+(succ!==null?' · éxitos: <strong>'+succ+'</strong>':'')+'</div><strong>'+finalTotal+'</strong>'; resultList.appendChild(line); seriesTotals.push(finalTotal); if(succ!==null) seriesSuccs.push(succ); if(showStats) renderStats(seriesTotals, seriesSuccs); }
       if(!append) modal.classList.add('show'); if(!append){ history.unshift({time:new Date().toLocaleString(), summary:getSelectionSummary(), mod, advMode, total:finalTotal, succ}); }
     }
 
@@ -407,37 +422,35 @@
 
     function renderHistory(){ histCount.textContent=''+history.length; if(!history.length){ historyList.innerHTML='<div class="muted">Sin tiradas aún.</div>'; return; } historyList.innerHTML = history.map(h=>'<div class="line"><div><strong>'+h.time+'</strong><br/><span class="muted">'+h.summary+'</span></div><div><strong>'+h.total+'</strong>'+ (h.succ!=null?(' · éxitos: '+h.succ):'') +'</div></div>').join(''); }
 
-    function buildPlainTextResult(){ const html=resultList.innerText.trim(); return 'Tirada ('+new Date().toLocaleString()+'):\n'+getSelectionSummary()+'\n'+html; }
+    function buildPlainTextResult(){ const html=resultList.innerText.trim(); return 'Tirada ('+new Date().toLocaleString()+'):
+'+getSelectionSummary()+'
+'+html; }
 
+    /* ==================== FALLBACKS ==================== */
     function fallbackIconData(key){ const colors={ d2:'#f59e0b', d4:'#2563eb', d6:'#eab308', d8:'#10b981', d10:'#9333ea', d12:'#84cc16', d20:'#ef4444', d100:'#8b5cf6' }; const c=colors[key]||'#38bdf8'; const shape = key==='d6' ? 'square' : (key==='d4'?'tri':'poly'); var svg=''; if(shape==='square') svg="<svg viewBox='0 0 100 100' xmlns='http://www.w3.org/2000/svg'><rect x='16' y='16' width='68' height='68' rx='14' fill='"+c+"'/></svg>"; else if(shape==='tri') svg="<svg viewBox='0 0 100 100' xmlns='http://www.w3.org/2000/svg'><polygon points='50,14 86,86 14,86' fill='"+c+"'/></svg>"; else svg="<svg viewBox='0 0 100 100' xmlns='http://www.w3.org/2000/svg'><polygon points='50,12 86,38 74,84 26,84 14,38' fill='"+c+"'/></svg>"; return 'data:image/svg+xml;charset=utf-8,'+encodeURIComponent(svg); }
     function fallbackRollData(){ const svg = "<svg viewBox='0 0 100 100' xmlns='http://www.w3.org/2000/svg'><circle cx='50' cy='50' r='36' fill='none' stroke='#ffffff' stroke-width='6' stroke-linecap='round'><animateTransform attributeName='transform' type='rotate' from='0 50 50' to='360 50 50' dur='0.45s' repeatCount='indefinite'/></circle></svg>"; return 'data:image/svg+xml;charset=utf-8,'+encodeURIComponent(svg); }
 
+    /* ==================== MUTADORES + UI ==================== */
     function adjust(key,delta){ state[key]=Math.max(0,(state[key]||0)+delta); updateUI(); }
     function updateUI(){ for(const d of DICE){ const cnt=document.querySelector('[data-key="'+d.key+'"][data-role="count"]'); if(cnt) cnt.textContent = state[d.key]||0; } const arr=DICE.filter(d=>state[d.key]>0).map(d=> (state[d.key]+'×'+d.label) ); const totalDice = DICE.reduce((acc,d)=>acc+(state[d.key]||0),0); const modTxt=mod? (mod>0?(' + '+mod):(' − '+Math.abs(mod))):''; const advTxt=advMode==='adv'? ' · ventaja' : (advMode==='dis'? ' · desventaja' : ''); const succTxt=succMode==='none'? '' : (' · éxitos: '+(succMode==='ge'?'≥':'≤')+' '+succTarget); summary.textContent = arr.length? (arr.join(' · ')+modTxt+advTxt+succTxt) : 'Sin dados seleccionados.'; btnRoll.disabled = (totalDice===0); modVal.textContent = mod; repVal.textContent = repeatCount; succTargetInp.disabled=(succMode==='none'); succTargetInp.value=succTarget; rerollOnesChk.checked=rerollOnes; explodeMaxChk.checked=explodeMax; succModeSel.value=succMode; showStatsChk.checked=showStats; }
 
-    // ===== Tests =====
+    /* ==================== TESTS ==================== */
     (function runTests(){
-      const results = [];
-      function assert(cond, name){ results.push({name, pass:!!cond}); cond? console.log('✅', name): console.error('❌', name); }
+      const results=[]; const assert=(c,n)=>{results.push({name:n,pass:!!c}); c?console.log('✅',n):console.error('❌',n)};
+      // Cards renderizados
+      assert(document.querySelectorAll('.card').length===DICE_BASE.length,'Cards iniciales renderizados');
+      // Botón lanzar existe y está visible en DOM
+      assert(!!document.getElementById('btnRoll'),'Existe botón "Lanzar dados"');
+      // Swipe programático
+      const before=pager.style.transform; go(1); const ok1=pager.style.transform.includes('-100'); go(0); const ok0=pager.style.transform.includes('0'); assert(ok1&&ok0,'Pager go() 0/1');
+      // CSV separador 
 
-      // 1) Los cards iniciales se renderizan
-      const cards = document.querySelectorAll('.card');
-      assert(cards.length === DICE_BASE.length, 'Se renderizan los cards iniciales');
-
-      // 2) CSV usa \n como separador
-      const csvSample = ['a','b'].join('\n');
-      assert(csvSample.indexOf('\n') !== -1, 'CSV sample incluye "\\n"');
-
-      // 3) buildPlainTextResult devuelve saltos de línea \n
-      try{ const txt = (function(){
-        const tmp = document.createElement('div'); tmp.id='resultList'; tmp.textContent='x';
-        return 'Tirada ('+new Date().toLocaleString()+')\nPrueba';
-      })(); assert(/\n/.test(txt),'Texto plano usa "\\n"'); }catch(e){ console.warn('Test buildPlainTextResult omitido'); }
-
-      // 4) Swipe go(1)/go(0) mueve el pager
-      const before = pager.style.transform; go(1); const moved1 = pager.style.transform.indexOf('-100')!==-1; go(0); const moved0 = pager.style.transform.indexOf('0')!==-1; assert(moved1 && moved0, 'Pager go() navega 0/1');
-
-      const report = document.createElement('pre'); report.id='testReport'; report.style.display='none'; report.textContent = JSON.stringify(results,null,2); document.body.appendChild(report);
+      assert(['a','b'].join('
+').indexOf('
+')!==-1,'CSV usa "\n"');
+      // SPRITES definidos
+      assert(!!SPRITES.d6 && 'roll' in SPRITES.d6,'Sprites mapeados (d6)');
+      const pre=document.createElement('pre'); pre.id='testReport'; pre.style.display='none'; pre.textContent=JSON.stringify(results,null,2); document.body.appendChild(pre);
     })();
   })();
   </script>
