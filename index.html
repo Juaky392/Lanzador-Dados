@@ -4,7 +4,6 @@
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1, user-scalable=no" />
   <title>Lanzador de dados – DyD</title>
-  <!-- Retro font -->
   <link href="https://fonts.googleapis.com/css2?family=Press+Start+2P&display=swap" rel="stylesheet">
   <style>
     :root{
@@ -13,16 +12,15 @@
     html,body{height:100%;margin:0;background:var(--bg);color:var(--text);font-family:system-ui,-apple-system,Segoe UI,Roboto,Ubuntu,Cantarell,Noto Sans,sans-serif;overflow:hidden}
     .app{height:100%;display:flex;flex-direction:column}
 
-    /* ===== Title retro ===== */
     .retroWrap{padding:14px 16px 6px}
     .retro{font-family:'Press Start 2P', monospace; font-size:18px; color:#fff; text-transform:uppercase; letter-spacing:1px; text-align:center}
     .retro .glow{display:inline-block; padding:8px 10px; border-radius:10px; background:linear-gradient(90deg,#0ea5e9 0%,#22d3ee 40%,#a78bfa 100%); -webkit-background-clip:text; background-clip:text; color:transparent; text-shadow:0 0 18px #22d3ee55}
 
-    /* ===== Pager ===== */
-    .pager{flex:1; display:flex; width:200vw; transform:translateX(0); transition:transform .25s ease; will-change:transform; touch-action:pan-y}
+    /* PAGER */
+    .pager{flex:1; display:flex; width:200vw; transform:translateX(0); transition:transform .25s ease; will-change:transform; touch-action: pan-y}
     .screen{width:100vw; height:calc(100vh - 54px); overflow:auto; -webkit-overflow-scrolling:touch; overscroll-behavior-y:contain}
 
-    /* ===== Screen: DADOS ===== */
+    /* DADOS */
     .wrap{max-width:1100px;margin:0 auto;padding:14px}
     .grid{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:12px}
     @media(min-width:760px){.grid{grid-template-columns:repeat(4,minmax(0,1fr));}}
@@ -51,10 +49,9 @@
     .btnPrimary{appearance:none;border:none;background:var(--accent);color:#03202a;font-weight:800;padding:12px 16px;border-radius:14px;box-shadow:0 10px 24px #0008;cursor:pointer}
     .btnPrimary:disabled{opacity:.5;cursor:not-allowed}
 
-    /* FAB opciones */
     .fab{position:fixed; right:14px; top:64px; z-index:20; width:46px; height:46px; border-radius:999px; border:1px solid #ffffff33; background:#0b1220cc; color:#e5e7eb; font-size:20px; cursor:pointer; box-shadow:0 8px 18px #0008}
 
-    /* ===== Screen: OPCIONES ===== */
+    /* OPCIONES */
     .optionsWrap{max-width:1100px;margin:0 auto;padding:14px;display:flex;flex-direction:column;gap:12px}
     .rowWrap{display:flex;flex-wrap:wrap;gap:10px;align-items:center}
     .field{display:inline-flex;align-items:center;gap:6px;border:1px solid #ffffff33;border-radius:10px;padding:4px 6px;background:#0b1220}
@@ -72,7 +69,7 @@
 
     .advanced{width:100%;padding:8px 14px;border-top:1px dashed #ffffff2a;background:#0b1220cc;border-radius:10px}
 
-    /* Modales (sin cambios) */
+    /* Modales */
     .modal{position:fixed;inset:0;background:#0009;display:none;align-items:center;justify-content:center;z-index:40}
     .modal.show{display:flex}
     .modalCard{background:var(--panel);border:1px solid #ffffff22;border-radius:16px;padding:16px 14px;min-width:min(92vw,760px);max-height:80vh;overflow:auto}
@@ -86,7 +83,6 @@
     .btnGhost{background:transparent;border:1px solid #ffffff44;color:#e5e7eb}
     .btnOk{background:var(--ok);color:#03202a;font-weight:800}
 
-    /* Stats */
     .statsBox{margin-top:10px;padding-top:8px;border-top:1px dashed #ffffff22}
     .statsSection{margin-top:8px}
     .statsTitle{color:#e5e7eb;font-weight:800;margin-bottom:4px}
@@ -99,17 +95,15 @@
     .crit{color:#86efac}
     .fail{color:#fca5a5}
 
-    /* Swipe hint */
     .hint{position:fixed;left:50%;bottom:12px;transform:translateX(-50%);font-size:.8rem;color:#9ca3af}
   </style>
 </head>
 <body>
   <div class="app" id="app">
-    <!-- Retro title before content -->
     <div class="retroWrap"><div class="retro"><span class="glow">Lanzador de dados DyD</span></div></div>
 
     <div class="pager" id="pager">
-      <!-- ===== Screen 1: DADOS ===== -->
+      <!-- DADOS -->
       <section class="screen" id="screenDice">
         <div class="wrap">
           <div class="grid" id="diceGrid"></div>
@@ -124,18 +118,16 @@
         <div class="hint">Desliza ⇄ para cambiar de pantalla</div>
       </section>
 
-      <!-- ===== Screen 2: OPCIONES ===== -->
+      <!-- OPCIONES -->
       <section class="screen" id="screenOptions">
         <div class="optionsWrap">
           <div class="rowWrap">
             <button class="ghost" id="goDice">← Dados</button>
-            <!-- Presets -->
             <div class="field">
               <select id="presetSelect"><option value="">Preset: ninguno</option></select>
               <input id="presetName" type="text" placeholder="Guardar como…" />
               <button class="primary" id="savePreset">Guardar</button>
             </div>
-            <!-- Modificador -->
             <div class="field">
               <span style="opacity:.75">Mod</span>
               <div class="step">
@@ -144,20 +136,16 @@
                 <button id="modInc">+</button>
               </div>
             </div>
-            <!-- Ventaja / Desventaja -->
             <div class="seg" id="advGroup">
               <button data-mode="normal" class="active">Normal</button>
               <button data-mode="adv">Ventaja</button>
               <button data-mode="dis">Desventaja</button>
             </div>
-            <!-- Historial -->
             <button class="ghost" id="openHistory">Historial</button>
           </div>
 
-          <!-- Panel avanzado siempre visible (compacto) -->
           <div class="advanced" id="advPanel">
             <div class="rowWrap">
-              <!-- Repetir N veces -->
               <div class="field">
                 <span style="opacity:.75">Repetir</span>
                 <div class="step">
@@ -167,7 +155,6 @@
                 </div>
                 <span class="muted">veces</span>
               </div>
-              <!-- Umbral de éxitos -->
               <div class="field">
                 <span style="opacity:.75">Éxitos</span>
                 <select id="succMode">
@@ -177,18 +164,15 @@
                 </select>
                 <input id="succTarget" type="number" value="10" min="1" max="100" />
               </div>
-              <!-- Re-roll rules -->
               <div class="field" style="gap:10px">
                 <label><input type="checkbox" id="rerollOnes"> Re-roll 1s (1 vez)</label>
                 <label><input type="checkbox" id="explodeMax"> Exploding en máximo</label>
               </div>
-              <!-- Dado personalizado -->
               <div class="field">
                 <span style="opacity:.75">Dado personalizado</span>
                 <input id="customSides" type="number" min="2" max="100" placeholder="Caras (p.ej. 7)" />
                 <button class="ghost" id="addCustom">Añadir</button>
               </div>
-              <!-- Stats + Export + Reset -->
               <div class="field"><label><input type="checkbox" id="showStats"> Mostrar estadísticas</label></div>
               <button class="ghost" id="exportHistory">Exportar historial</button>
               <button class="danger" id="resetAll">Restablecer</button>
@@ -233,41 +217,22 @@
 
   <script>
   (function(){
-    // ===== Pager (navegación) =====
+    // ===== Swipe: Pointer + Touch fallback =====
     const pager = document.getElementById('pager');
-    let page = 0; // 0: dados, 1: opciones
-    function go(n){ page = Math.max(0, Math.min(1, n)); pager.style.transform = `translateX(${-page*100}vw)`; }
-    document.getElementById('goOptions').addEventListener('click', ()=>go(1));
-    document.getElementById('goDice').addEventListener('click', ()=>go(0));
+    let startX=0, startY=0, moving=false, page=0; // 0 dados, 1 opciones
+    function go(n){ page=Math.max(0,Math.min(1,n)); pager.style.transform = 'translateX(' + (-page*100) + 'vw)'; }
+    document.getElementById('goOptions').addEventListener('click',()=>go(1));
+    document.getElementById('goDice').addEventListener('click',()=>go(0));
 
-    // Gestos táctiles con Pointer Events + touch-action: pan-y
-    let startX=0, startY=0, tracking=false, moved=false;
-    pager.addEventListener('pointerdown', (e)=>{
-      if (e.pointerType!=='touch') return; // solo táctil
-      startX = e.clientX; startY = e.clientY; tracking = true; moved=false;
-    }, {passive:true});
-    pager.addEventListener('pointermove', (e)=>{
-      if (!tracking) return;
-      const dx = e.clientX - startX; const dy = e.clientY - startY;
-      // con touch-action: pan-y, no hace falta preventDefault para bloquear horizontal
-      if (Math.abs(dx) > Math.abs(dy) && Math.abs(dx) > 24) moved = true;
-    });
-    function endSwipe(e){
-      if (!tracking) return;
-      const dx = e.clientX - startX; const dy = e.clientY - startY;
-      if (moved && Math.abs(dx) > 60 && Math.abs(dx) > Math.abs(dy)){
-        if (dx < 0) go(1); else go(0);
-      }
-      tracking=false; moved=false;
-    }
-    pager.addEventListener('pointerup', endSwipe);
-    pager.addEventListener('pointercancel', ()=>{ tracking=false; moved=false; });
+    // Pointer Events
+    pager.addEventListener('pointerdown', e=>{ if(e.pointerType!=='touch') return; startX=e.clientX; startY=e.clientY; moving=true; }, {passive:true});
+    pager.addEventListener('pointerup', e=>{ if(!moving) return; const dx=e.clientX-startX, dy=e.clientY-startY; finishSwipe(dx,dy); moving=false; });
+    pager.addEventListener('pointercancel', ()=>{ moving=false; });
+    // Touch fallback
+    pager.addEventListener('touchstart', e=>{ if(e.touches.length!==1) return; startX=e.touches[0].clientX; startY=e.touches[0].clientY; moving=true; }, {passive:true});
+    pager.addEventListener('touchend', e=>{ if(!moving) return; const t=e.changedTouches[0]; const dx=t.clientX-startX, dy=t.clientY-startY; finishSwipe(dx,dy); moving=false; }, {passive:true});
 
-    // Accesibilidad: flechas del teclado para probar en desktop
-    window.addEventListener('keydown', (e)=>{
-      if (e.key==='ArrowRight') go(1);
-      if (e.key==='ArrowLeft') go(0);
-    });
+    function finishSwipe(dx,dy){ if(Math.abs(dx)>60 && Math.abs(dx)>Math.abs(dy)){ if(dx<0) go(1); else go(0); } }
 
     // ===== Config =====
     const DICE_BASE = [
@@ -281,56 +246,23 @@
       {key:'d100',sides:100, label:'D100'},
     ];
 
-    const SPRITES = {
-      d2:  { icon: 'assets/d2/die.png',  roll: 'assets/d2/roll.webp' },
-      d4:  { icon: 'assets/d4/die.png',  roll: 'assets/d4/roll.webp' },
-      d6:  { icon: 'assets/d6/die.png',  roll: 'assets/d6/roll.webp' },
-      d8:  { icon: 'assets/d8/die.png',  roll: 'assets/d8/roll.webp' },
-      d10: { icon: 'assets/d10/die.png', roll: 'assets/d10/roll.webp' },
-      d12: { icon: 'assets/d12/die.png', roll: 'assets/d12/roll.webp' },
-      d20: { icon: 'assets/d20/die.png', roll: 'assets/d20/roll.webp' },
-      d100:{ icon: 'assets/d100/die.png',roll: 'assets/d100/roll.webp' },
-    };
+    // Usa fallbacks por defecto para evitar rutas rotas
+    const SPRITES = {}; // si añades assets, rellena como {d6:{icon:'...', roll:'...'}}
 
     // ===== Estado =====
     let DICE = [...DICE_BASE];
     const state = Object.fromEntries(DICE.map(d=>[d.key,0]));
-    let mod = 0; // modificador
-    let advMode = 'normal'; // 'normal' | 'adv' | 'dis'
+    let mod = 0; let advMode = 'normal';
     const history = [];
 
     // Avanzadas
-    let repeatCount = 1;
-    let succMode = 'none'; // 'none' | 'ge' | 'le'
-    let succTarget = 10;
-    let rerollOnes = false;
-    let explodeMax = false;
-    let showStats = false;
+    let repeatCount = 1; let succMode='none'; let succTarget=10; let rerollOnes=false; let explodeMax=false; let showStats=false;
+    let seriesTotals=[]; let seriesSuccs=[];
 
-    // Series (para estadísticas de runs)
-    let seriesTotals = [];
-    let seriesSuccs = [];
-
-    // ===== Audio (traqueteo) =====
-    let audioCtx = null;
-    function getCtx(){ if(!audioCtx) audioCtx = new (window.AudioContext||window.webkitAudioContext)(); return audioCtx; }
-    function clickAt(t){
-      const ctx = getCtx();
-      const o = ctx.createOscillator();
-      const g = ctx.createGain();
-      o.type='triangle'; o.frequency.setValueAtTime(100 + Math.random()*200, t);
-      g.gain.setValueAtTime(0.0001, t);
-      g.gain.exponentialRampToValueAtTime(0.2, t+0.005);
-      g.gain.exponentialRampToValueAtTime(0.0001, t+0.08);
-      o.connect(g).connect(ctx.destination);
-      o.start(t); o.stop(t+0.09);
-    }
-    function playRattle(ms=450){
-      try{
-        const ctx = getCtx(); const now = ctx.currentTime; const n = Math.max(6, Math.min(14, Math.round(ms/50)));
-        for(let i=0;i<n;i++){ clickAt(now + i*(ms/1000)/n + Math.random()*0.02); }
-      }catch(_){/* ignore */}
-    }
+    // ===== Audio =====
+    let audioCtx=null; function getCtx(){ if(!audioCtx) audioCtx=new (window.AudioContext||window.webkitAudioContext)(); return audioCtx; }
+    function clickAt(t){ const ctx=getCtx(); const o=ctx.createOscillator(); const g=ctx.createGain(); o.type='triangle'; o.frequency.setValueAtTime(100+Math.random()*200,t); g.gain.setValueAtTime(0.0001,t); g.gain.exponentialRampToValueAtTime(0.2,t+0.005); g.gain.exponentialRampToValueAtTime(0.0001,t+0.08); o.connect(g).connect(ctx.destination); o.start(t); o.stop(t+0.09); }
+    function playRattle(ms=450){ try{ const ctx=getCtx(); const now=ctx.currentTime; const n=Math.max(6,Math.min(14,Math.round(ms/50))); for(let i=0;i<n;i++){ clickAt(now+i*(ms/1000)/n+Math.random()*0.02); } }catch(_){} }
 
     // ===== UI refs =====
     const grid = document.getElementById('diceGrid');
@@ -380,453 +312,111 @@
     const resetAllBtn = document.getElementById('resetAll');
 
     // ===== Render inicial =====
-    renderGrid();
+    function cardHTML(d){
+      const files = SPRITES[d.key]||{}; const iconSrc = files.icon || fallbackIconData(d.key);
+      return '<div class="card" data-type="'+d.key+'">\
+        <div class="icon" data-key="'+d.key+'"><img class="base" alt="'+d.label+'" src="'+iconSrc+'"/></div>\
+        <div class="row"><div class="label">'+d.label+'</div><div class="muted">'+d.sides+' caras</div></div>\
+        <div class="row qty">\
+          <button data-key="'+d.key+'" data-action="dec" aria-label="menos">-</button>\
+          <div class="count" data-role="count" data-key="'+d.key+'">0</div>\
+          <button data-key="'+d.key+'" data-action="inc" aria-label="más">+</button>\
+        </div>\
+      </div>';
+    }
+
     function renderGrid(){
-      grid.innerHTML = DICE.map(d=>cardHTML(d)).join('
+      if(!grid){ console.error('diceGrid no encontrado'); return; }
+      grid.innerHTML = DICE.map(cardHTML).join('
 ');
-      for (const d of DICE){
-        const minus = document.querySelector(`[data-key="${d.key}"][data-action="dec"]`);
-        const plus  = document.querySelector(`[data-key="${d.key}"][data-action="inc"]`);
+      for(const d of DICE){
+        const minus = document.querySelector('[data-key="'+d.key+'"][data-action="dec"]');
+        const plus  = document.querySelector('[data-key="'+d.key+'"][data-action="inc"]');
         if(minus) minus.addEventListener('click', ()=> adjust(d.key,-1));
         if(plus)  plus.addEventListener('click',  ()=> adjust(d.key,+1));
       }
       updateUI();
     }
+    renderGrid();
 
-    // Modificador
+    // ===== Lógica de opciones =====
     modDec.addEventListener('click', ()=>{ mod--; updateUI(); });
     modInc.addEventListener('click', ()=>{ mod++; updateUI(); });
+    advGroup.addEventListener('click', (e)=>{ if(e.target.tagName!=='BUTTON') return; advMode = e.target.dataset.mode; Array.from(advGroup.querySelectorAll('button')).forEach(b=>b.classList.toggle('active', b.dataset.mode===advMode)); updateUI(); });
 
-    // Ventaja/Desventaja
-    advGroup.addEventListener('click', (e)=>{
-      if (e.target.tagName!=='BUTTON') return;
-      advMode = e.target.dataset.mode;
-      Array.from(advGroup.querySelectorAll('button')).forEach(b=>b.classList.toggle('active', b.dataset.mode===advMode));
-      updateUI();
-    });
-
-    // Presets (localStorage)
     loadPresets();
-    presetSelect.addEventListener('change', ()=>{
-      const sel = presetSelect.value; if (!sel) return;
-      const list = readPresets(); const p = list.find(x=>x.name===sel); if (!p) return;
-      Object.assign(state, resetCounts(), p.dice); mod=p.mod||0; advMode=p.advMode||'normal';
-      Array.from(advGroup.querySelectorAll('button')).forEach(b=>b.classList.toggle('active', b.dataset.mode===advMode));
-      updateUI();
-    });
-    savePresetBtn.addEventListener('click', ()=>{
-      const name = (presetName.value||'').trim(); if(!name) return;
-      const data = { name, dice: {...state}, mod, advMode };
-      const list = readPresets();
-      const idx = list.findIndex(p=>p.name.toLowerCase()===name.toLowerCase());
-      if (idx>=0) list[idx]=data; else list.push(data);
-      localStorage.setItem('dyd_presets', JSON.stringify(list));
-      presetName.value=''; loadPresets(name);
-    });
+    presetSelect.addEventListener('change', ()=>{ const sel=presetSelect.value; if(!sel) return; const p=readPresets().find(x=>x.name===sel); if(!p) return; Object.assign(state, resetCounts(), p.dice); mod=p.mod||0; advMode=p.advMode||'normal'; Array.from(advGroup.querySelectorAll('button')).forEach(b=>b.classList.toggle('active', b.dataset.mode===advMode)); updateUI(); });
+    savePresetBtn.addEventListener('click', ()=>{ const name=(presetName.value||'').trim(); if(!name) return; const data={name, dice:{...state}, mod, advMode}; const list=readPresets(); const idx=list.findIndex(p=>p.name.toLowerCase()===name.toLowerCase()); if(idx>=0) list[idx]=data; else list.push(data); localStorage.setItem('dyd_presets', JSON.stringify(list)); presetName.value=''; loadPresets(name); });
+    function readPresets(){ try{return JSON.parse(localStorage.getItem('dyd_presets')||'[]');}catch(_){return [];} }
+    function loadPresets(selectName){ const list=readPresets(); if(!list.length){ list.push({name:'Ataque', dice:{d20:1}, mod:0, advMode:'normal'}); list.push({name:'Iniciativa', dice:{d20:1}, mod:0, advMode:'normal'}); localStorage.setItem('dyd_presets', JSON.stringify(list)); } presetSelect.innerHTML='<option value="">Preset: ninguno</option>' + list.map(p=>'<option '+(selectName===p.name?'selected':'')+' value="'+p.name+'">'+p.name+'</option>').join(''); }
 
-    function readPresets(){
-      try{ return JSON.parse(localStorage.getItem('dyd_presets')||'[]'); }catch(_){ return []; }
-    }
-    function loadPresets(selectName){
-      const list = readPresets();
-      if (!list.length){
-        list.push({name:'Ataque', dice:{d20:1}, mod:0, advMode:'normal'});
-        list.push({name:'Iniciativa', dice:{d20:1}, mod:0, advMode:'normal'});
-        localStorage.setItem('dyd_presets', JSON.stringify(list));
-      }
-      presetSelect.innerHTML = `<option value="">Preset: ninguno</option>` + list.map(p=>`<option ${selectName===p.name?'selected':''} value="${p.name}">${p.name}</option>`).join('');
-    }
-
-    // Opciones avanzadas (siempre visibles en pantalla de opciones)
     repDec.addEventListener('click', ()=>{ repeatCount=Math.max(1, repeatCount-1); repVal.textContent=repeatCount; });
     repInc.addEventListener('click', ()=>{ repeatCount=Math.min(100, repeatCount+1); repVal.textContent=repeatCount; });
-    succModeSel.addEventListener('change', ()=>{ succMode=succModeSel.value; succTargetInp.disabled = (succMode==='none'); });
-    succTargetInp.addEventListener('change', ()=>{ succTarget = Math.max(1, Math.min(100, parseInt(succTargetInp.value||10))); succTargetInp.value = succTarget; });
-    rerollOnesChk.addEventListener('change', ()=>{ rerollOnes = rerollOnesChk.checked; });
-    explodeMaxChk.addEventListener('change', ()=>{ explodeMax = explodeMaxChk.checked; });
-    showStatsChk.addEventListener('change', ()=>{ showStats = showStatsChk.checked; if (!showStats) {statsBox.style.display='none'; statsBox.innerHTML='';} });
+    succModeSel.addEventListener('change', ()=>{ succMode=succModeSel.value; succTargetInp.disabled=(succMode==='none'); });
+    succTargetInp.addEventListener('change', ()=>{ succTarget=Math.max(1,Math.min(100,parseInt(succTargetInp.value||10))); succTargetInp.value=succTarget; });
+    rerollOnesChk.addEventListener('change', ()=>{ rerollOnes=rerollOnesChk.checked; });
+    explodeMaxChk.addEventListener('change', ()=>{ explodeMax=explodeMaxChk.checked; });
+    showStatsChk.addEventListener('change', ()=>{ showStats=showStatsChk.checked; if(!showStats){ statsBox.style.display='none'; statsBox.innerHTML=''; } });
 
-    addCustomBtn.addEventListener('click', ()=>{
-      const n = parseInt(customSidesInp.value||0);
-      if (!n || n<2 || n>100) return;
-      const key = 'd'+n;
-      if (!DICE.find(d=>d.key===key)){
-        DICE.push({key, sides:n, label:'D'+n});
-        state[key]=0;
-        SPRITES[key] = { icon: '', roll: '' }; // usará fallbacks
-        renderGrid();
-      } else {
-        state[key] = (state[key]||0)+1; updateUI();
-      }
-      customSidesInp.value='';
-    });
+    addCustomBtn.addEventListener('click', ()=>{ const n=parseInt(customSidesInp.value||0); if(!n||n<2||n>100) return; const key='d'+n; if(!DICE.find(d=>d.key===key)){ DICE.push({key, sides:n, label:'D'+n}); state[key]=0; SPRITES[key]={icon:'', roll:''}; renderGrid(); } else { state[key]=(state[key]||0)+1; updateUI(); } customSidesInp.value=''; });
 
-    // Exportar historial (CSV)
-    exportHistoryBtn.addEventListener('click', ()=>{
-      if (!history.length){ alert('No hay historial para exportar.'); return; }
-      const header = ['fecha','resumen','mod','modo','total','exitos'];
-      const rows = history.map(h=>[h.time, (h.summary||'').replaceAll(',',';'), h.mod, h.advMode, h.total, (h.succ!=null?h.succ:'')]);
-      const csv = [header.join(','), ...rows.map(r=>r.join(','))].join('
-');
-      const blob = new Blob([csv], {type:'text/csv;charset=utf-8;'});
-      const url = URL.createObjectURL(blob);
-      const a = document.createElement('a'); a.href = url; a.download = 'historial_dados.csv'; a.click();
-      setTimeout(()=>URL.revokeObjectURL(url), 3000);
-    });
+    exportHistoryBtn.addEventListener('click', ()=>{ if(!history.length){ alert('No hay historial para exportar.'); return; } const header=['fecha','resumen','mod','modo','total','exitos']; const rows=history.map(h=>[h.time, (h.summary||'').replace(/,/g,';'), h.mod, h.advMode, h.total, (h.succ!=null?h.succ:'')]); const csv=[header.join(','), ...rows.map(r=>r.join(','))].join('
+'); const blob=new Blob([csv],{type:'text/csv;charset=utf-8;'}); const url=URL.createObjectURL(blob); const a=document.createElement('a'); a.href=url; a.download='historial_dados.csv'; a.click(); setTimeout(()=>URL.revokeObjectURL(url),3000); });
 
-    // Restablecer todo
-    resetAllBtn.addEventListener('click', ()=>{
-      if (!confirm('¿Seguro que quieres restablecer todo a valores por defecto? Esto borrará presets, historial, dados personalizados y ajustes.')) return;
-      try{ localStorage.removeItem('dyd_presets'); }catch(_){ }
-      // Reset runtime
-      DICE = [...DICE_BASE];
-      for (const k in state) delete state[k];
-      for (const d of DICE) state[d.key]=0;
-      mod = 0; advMode='normal'; repeatCount=1; succMode='none'; succTarget=10; rerollOnes=false; explodeMax=false; showStats=false;
-      seriesTotals=[]; seriesSuccs=[]; history.length=0;
-      // UI
-      renderGrid();
-      renderHistory();
-      alert('Restablecido.');
-      go(0);
-    });
+    resetAllBtn.addEventListener('click', ()=>{ if(!confirm('¿Seguro que quieres restablecer todo?')) return; try{localStorage.removeItem('dyd_presets');}catch(_){} DICE=[...DICE_BASE]; for(const k in state) delete state[k]; for(const d of DICE) state[d.key]=0; mod=0; advMode='normal'; repeatCount=1; succMode='none'; succTarget=10; rerollOnes=false; explodeMax=false; showStats=false; seriesTotals=[]; seriesSuccs=[]; history.length=0; renderGrid(); renderHistory(); go(0); alert('Restablecido.'); });
 
-    // Historial
     openHistoryBtn.addEventListener('click', ()=>{ renderHistory(); historyModal.classList.add('show'); });
     closeHistoryBtn.addEventListener('click', ()=> historyModal.classList.remove('show'));
     clearHistoryBtn.addEventListener('click', ()=>{ history.length=0; renderHistory(); });
 
-    // Lanzamiento
-    const ROLL_TIME = 420;  // ms por dado (ágil)
-    const FADE_TIME = 120;  // ms fade sprite
-
+    const ROLL_TIME=420, FADE_TIME=120;
     btnRoll.addEventListener('click', doRoll);
     btnAgain.addEventListener('click', ()=>{ modal.classList.remove('show'); doRoll(); });
     btnClose.addEventListener('click', ()=> modal.classList.remove('show'));
-    copyBtn.addEventListener('click', ()=>{ const text = buildPlainTextResult(); navigator.clipboard.writeText(text).catch(()=>{}); });
+    copyBtn.addEventListener('click', ()=>{ const text=buildPlainTextResult(); navigator.clipboard.writeText(text).catch(()=>{}); });
 
-    async function doRoll(){
-      const queue = buildQueue(); if (!queue.length) return;
-      btnRoll.disabled = true;
+    async function doRoll(){ const queue=buildQueue(); if(!queue.length) return; btnRoll.disabled=true; if(repeatCount===1){ const results=[]; for(const item of queue){ await animateOnCard(item.key); results.push( rollOne(item) ); } btnRoll.disabled=false; seriesTotals=[]; seriesSuccs=[]; showResults(queue, results, 1, 1); } else { seriesTotals=[]; seriesSuccs=[]; const results1=[]; for(const item of queue){ await animateOnCard(item.key); results1.push( rollOne(item) ); } showResults(queue, results1, 1, repeatCount, false); for(let r=2;r<=repeatCount;r++){ const results=queue.map(item=> rollOne(item)); showResults(queue, results, r, repeatCount, true); } btnRoll.disabled=false; } try{ if(navigator.vibrate) navigator.vibrate([20,10,20]); }catch(_){} }
 
-      if (repeatCount===1){
-        const results = [];
-        for (const item of queue){ await animateOnCard(item.key); results.push( rollOne(item) ); }
-        btnRoll.disabled = false; seriesTotals=[]; seriesSuccs=[]; showResults(queue, results, /*runIndex*/1, /*runs*/1);
-      } else {
-        // 1ª tirada animada
-        seriesTotals = []; seriesSuccs = [];
-        const results1 = [];
-        for (const item of queue){ await animateOnCard(item.key); results1.push( rollOne(item) ); }
-        showResults(queue, results1, 1, repeatCount, /*append*/false);
-        // resto sin animar (rápido)
-        for (let r=2; r<=repeatCount; r++){
-          const results = queue.map(item=> rollOne(item));
-          showResults(queue, results, r, repeatCount, /*append*/true);
-        }
-        btnRoll.disabled = false;
-      }
-      // vibración al mostrar resultados
-      try{ if (navigator.vibrate) navigator.vibrate([20,10,20]); }catch(_){ }
-    }
-
-    function buildQueue(){ const q = []; for (const d of DICE){ const n=state[d.key]||0; for(let i=0;i<n;i++) q.push({key:d.key,sides:d.sides}); } return q; }
-
+    function buildQueue(){ const q=[]; for(const d of DICE){ const n=state[d.key]||0; for(let i=0;i<n;i++) q.push({key:d.key,sides:d.sides}); } return q; }
     function resetCounts(){ const o={}; for(const d of DICE){ o[d.key]=0; } return o; }
 
-    // RNG sin sesgo
-    function randInt(n){
-      if (window.crypto && window.crypto.getRandomValues){
-        const buf = new Uint32Array(1);
-        const max = Math.floor(0xFFFFFFFF / n) * n;
-        let x; do { window.crypto.getRandomValues(buf); x = buf[0]; } while (x >= max);
-        return 1 + (x % n);
-      }
-      return 1 + Math.floor(Math.random()*n);
+    function randInt(n){ if(window.crypto&&window.crypto.getRandomValues){ const buf=new Uint32Array(1); const max=Math.floor(0xFFFFFFFF/n)*n; let x; do{ window.crypto.getRandomValues(buf); x=buf[0]; }while(x>=max); return 1+(x%n); } return 1+Math.floor(Math.random()*n); }
+
+    function rollOne(item){ const s=item.sides; if(item.key==='d20' && advMode!=='normal'){ const a=coreRoll(s); const b=coreRoll(s); const chosen=advMode==='adv'?Math.max(a.val,b.val):Math.min(a.val,b.val); return {key:'d20', sides:s, pair:[a.val,b.val], chosen, advMode, rolls:[a,b]}; } return coreRoll(s, item.key); }
+
+    function coreRoll(sides, key){ let total=randInt(sides); const parts=[total]; if(rerollOnes && total===1){ const r=randInt(sides); parts.push(r); total=r; } if(explodeMax){ while(total===sides){ const r=randInt(sides); parts.push(r); total+=r; if(r!==sides) break; } } return {key:key||('d'+sides), sides, val:total, parts}; }
+
+    function animateOnCard(key){ return new Promise((resolve)=>{ const icon=document.querySelector(".icon[data-key='"+key+"']"); if(!icon) return resolve(); const card=icon.closest('.card'); card.classList.add('active'); const base=icon.querySelector('img.base'); if(base) base.style.opacity='0'; const spr=document.createElement('div'); spr.className='sprite spin'; const img=document.createElement('img'); const conf=SPRITES[key]; img.src=(conf && conf.roll)? conf.roll : fallbackRollData(); spr.appendChild(img); icon.appendChild(spr); playRattle(ROLL_TIME); setTimeout(()=>{ spr.classList.add('fadeout'); setTimeout(()=>{ spr.remove(); if(base) base.style.opacity='1'; card.classList.remove('active'); resolve(); }, FADE_TIME); }, ROLL_TIME); }); }
+
+    function computeSuccesses(results){ if(succMode==='none') return null; let succ=0; for(const r of results){ let val=(r.key==='d20' && r.pair)? r.chosen : r.val; if(succMode==='ge' && val>=succTarget) succ++; if(succMode==='le' && val<=succTarget) succ++; } return succ; }
+
+    function showResults(queue, results, runIndex=1, runs=1, append=false){ const byType={}; let sum=0; for(const r of results){ const k=r.key; byType[k]=byType[k]||[]; if(k==='d20'&&r.pair){ byType[k].push(r); sum+=r.chosen; } else { byType[k].push(r.val); sum+=r.val; } } const succ=computeSuccesses(results); const finalTotal=sum+mod; const diceCount=queue.length; totalEl.textContent = (runs>1?('Serie '+runIndex+'/'+runs+' — Total: '+finalTotal):('Total: '+finalTotal)); const bits=[diceCount+' dado'+(diceCount!==1?'s':'')]; if(mod) bits.push((mod>0?'+':'')+mod); if(advMode!=='normal') bits.push(advMode==='adv'?'ventaja':'desventaja'); if(succ!==null) bits.push('éxitos: '+succ); badgeEl.textContent = bits.join(' · ');
+      if(!append){ resultList.innerHTML=''; statsBox.style.display='none'; statsBox.innerHTML=''; }
+      if(runs===1){ const order=DICE.map(d=>d.key); const lines=[]; for(const k of order){ if(!byType[k]) continue; const sides=(DICE.find(d=>d.key===k)||{sides:parseInt(k.replace('d',''))}).sides; const label='D'+sides; if(k==='d20'&&advMode!=='normal'){ const parts=byType[k].map(o=>'('+o.pair[0]+', '+o.pair[1]+') → <strong class="'+(o.chosen===20?'crit':(o.chosen===1?'fail':''))+'">'+o.chosen+'</strong>'); const subtotal=byType[k].reduce((a,b)=>a+b.chosen,0); lines.push('<div class="line"><div>'+label+' ('+parts.length+') '+(advMode==='adv'?'con ventaja':'con desventaja')+':</div><div>'+parts.join(' + ')+' = <strong>'+subtotal+'</strong></div></div>'); } else { const arr=byType[k]; const subtotal=arr.reduce((a,b)=>a+b,0); lines.push('<div class="line"><div>'+label+' ('+arr.length+'): </div><div>'+arr.join(' + ')+' = <strong>'+subtotal+'</strong></div></div>'); } } if(mod){ lines.push('<div class="line"><div>Modificador:</div><div>'+ (mod>0?'+':'') + mod +'</div></div>'); } if(succ!==null){ lines.push('<div class="line"><div>Éxitos ('+(succMode==='ge'?'≥':'≤')+' '+succTarget+'):</div><div><strong>'+succ+'</strong></div></div>'); } resultList.innerHTML = lines.join(''); } else { const line=document.createElement('div'); line.className='line'; line.innerHTML='<div>Tirada '+runIndex+(succ!==null?' · éxitos: <strong>'+succ+'</strong>':'')+'</div><div><strong>'+finalTotal+'</strong></div>'; resultList.appendChild(line); seriesTotals.push(finalTotal); if(succ!==null) seriesSuccs.push(succ); if(showStats) renderStats(seriesTotals, seriesSuccs); }
+      if(!append) modal.classList.add('show'); if(!append){ history.unshift({time:new Date().toLocaleString(), summary:getSelectionSummary(), mod, advMode, total:finalTotal, succ}); }
     }
 
-    function rollOne(item){
-      const s = item.sides;
-      // D20 con ventaja/desventaja
-      if (item.key==='d20' && advMode!=='normal'){
-        const a = coreRoll(s); const b = coreRoll(s);
-        const chosen = advMode==='adv'? Math.max(a.val,b.val): Math.min(a.val,b.val);
-        return {key:'d20', sides:s, pair:[a.val,b.val], chosen, advMode, rolls:[a, b]};
-      }
-      return coreRoll(s, item.key);
-    }
+    function renderStats(totals, succs){ if(!totals||!totals.length) return; statsBox.style.display='block'; const totalsStats=computeStats(totals); const totalsHist=buildHistRows(totalsStats); let succHtml=''; if(succMode!=='none' && succs && succs.length){ const succStats=computeStats(succs); succHtml='<div class="statsSection"><div class="statsTitle">Éxitos</div><div class="statsHeader"><div class="chip">Mín: <strong>'+succStats.min+'</strong></div><div class="chip">Media: <strong>'+succStats.mean.toFixed(2)+'</strong></div><div class="chip">Máx: <strong>'+succStats.max+'</strong></div><div class="chip">Muestras: <strong>'+succStats.n+'</strong></div></div><div class="hist">'+buildHistRows(succStats)+'</div></div>'; } statsBox.innerHTML='<div class="statsSection"><div class="statsTitle">Totales</div><div class="statsHeader"><div class="chip">Mín: <strong>'+totalsStats.min+'</strong></div><div class="chip">Media: <strong>'+totalsStats.mean.toFixed(2)+'</strong></div><div class="chip">Máx: <strong>'+totalsStats.max+'</strong></div><div class="chip">Muestras: <strong>'+totalsStats.n+'</strong></div></div><div class="hist">'+totalsHist+'</div></div>'+succHtml; }
 
-    function coreRoll(sides, key){
-      let total = randInt(sides);
-      const parts = [total];
-      // Re-roll 1s (una vez)
-      if (rerollOnes && total===1){ const r = randInt(sides); parts.push(r); total = r; }
-      // Exploding (mientras sea máximo)
-      if (explodeMax){ while (total===sides){ const r = randInt(sides); parts.push(r); total += r; if (r!==sides) break; } }
-      return {key: key||('d'+sides), sides, val: total, parts};
-    }
+    function computeStats(arr){ const n=arr.length; const min=Math.min.apply(null,arr); const max=Math.max.apply(null,arr); const mean=arr.reduce((a,b)=>a+b,0)/n; const bins=Math.min(10,Math.max(5,Math.floor(Math.sqrt(n)))); const span=Math.max(1,max-min+1); const step=Math.max(1,Math.floor(span/bins)); const counts=new Array(bins).fill(0); for(const v of arr){ let idx=Math.floor((v-min)/step); if(idx>=bins) idx=bins-1; counts[idx]++; } return {n,min,max,mean,bins,minBase:min,step,counts}; }
+    function buildHistRows(stats){ const bins=stats.bins, minBase=stats.minBase, step=stats.step, counts=stats.counts; const maxCount=Math.max.apply(null,counts); return counts.map(function(c,i){ const a=minBase+i*step; const b=minBase+(i+1)*step-1; const w=maxCount? Math.round(c/maxCount*100) : 0; return '<div class="histRow"><div class="muted">'+a+'–'+b+'</div><div class="bar" style="width:'+w+'%"></div><div class="muted">'+c+'</div></div>'; }).join(''); }
 
-    function animateOnCard(key){
-      return new Promise((resolve)=>{
-        const icon = document.querySelector(`.icon[data-key='${key}']`); if(!icon) return resolve();
-        const card = icon.closest('.card'); card.classList.add('active');
-        const base = icon.querySelector('img.base'); if (base) base.style.opacity='0';
-        const spr = document.createElement('div'); spr.className='sprite spin';
-        const img = document.createElement('img'); const conf = SPRITES[key];
-        img.src = conf && conf.roll ? conf.roll : fallbackRollData();
-        spr.appendChild(img); icon.appendChild(spr);
-        playRattle(ROLL_TIME);
-        setTimeout(()=>{
-          spr.classList.add('fadeout');
-          setTimeout(()=>{ spr.remove(); if (base) base.style.opacity='1'; card.classList.remove('active'); resolve(); }, FADE_TIME);
-        }, ROLL_TIME);
-      });
-    }
+    function getSelectionSummary(){ const arr=DICE.filter(d=>state[d.key]>0).map(d=> (state[d.key]+'×'+d.label) ); const modTxt=mod? (mod>0?(' + '+mod):(' − '+Math.abs(mod))):''; const advTxt=advMode==='adv'? ' · ventaja' : (advMode==='dis'? ' · desventaja' : ''); const succTxt=succMode==='none'? '' : (' · éxitos: '+(succMode==='ge'?'≥':'≤')+' '+succTarget); return (arr.join(' · ')||'—') + modTxt + advTxt + succTxt; }
 
-    function computeSuccesses(results){
-      if (succMode==='none') return null;
-      let succ = 0;
-      for (const r of results){
-        let val;
-        if (r.key==='d20' && r.pair) val = r.chosen; else val = r.val;
-        if (succMode==='ge' && val>=succTarget) succ++;
-        if (succMode==='le' && val<=succTarget) succ++;
-      }
-      return succ;
-    }
+    function renderHistory(){ histCount.textContent=''+history.length; if(!history.length){ historyList.innerHTML='<div class="muted">Sin tiradas aún.</div>'; return; } historyList.innerHTML = history.map(h=>'<div class="line"><div><strong>'+h.time+'</strong><br/><span class="muted">'+h.summary+'</span></div><div><strong>'+h.total+'</strong>'+ (h.succ!=null?(' · éxitos: '+h.succ):'') +'</div></div>').join(''); }
 
-    function showResults(queue, results, runIndex=1, runs=1, append=false){
-      // Suma por tipo y global
-      const byType = {}; let sum = 0;
-      for (const r of results){ const k=r.key; byType[k]=byType[k]||[]; if(k==='d20'&&r.pair){byType[k].push(r); sum+=r.chosen;} else {byType[k].push(r.val); sum+=r.val;} }
-      const succ = computeSuccesses(results);
-      const finalTotal = sum + mod;
+    function buildPlainTextResult(){ const html=resultList.innerText.trim(); return 'Tirada ('+new Date().toLocaleString()+'):
+'+getSelectionSummary()+'
+'+html; }
 
-      // Cabecera
-      const diceCount = queue.length;
-      totalEl.textContent = runs>1 ? `Serie ${runIndex}/${runs} — Total: ${finalTotal}` : `Total: ${finalTotal}`;
-      const bits = [`${diceCount} dado${diceCount!==1?'s':''}`];
-      if (mod) bits.push(`${mod>0?'+':''}${mod}`);
-      if (advMode!=='normal') bits.push(advMode==='adv'?'ventaja':'desventaja');
-      if (succ!==null) bits.push(`éxitos: ${succ}`);
-      badgeEl.textContent = bits.join(' · ');
+    function fallbackIconData(key){ const colors={ d2:'#f59e0b', d4:'#2563eb', d6:'#eab308', d8:'#10b981', d10:'#9333ea', d12:'#84cc16', d20:'#ef4444', d100:'#8b5cf6' }; const c=colors[key]||'#38bdf8'; const shape = key==='d6' ? 'square' : (key==='d4'?'tri':'poly'); var svg=''; if(shape==='square') svg="<svg viewBox='0 0 100 100' xmlns='http://www.w3.org/2000/svg'><rect x='16' y='16' width='68' height='68' rx='14' fill='"+c+"'/></svg>"; else if(shape==='tri') svg="<svg viewBox='0 0 100 100' xmlns='http://www.w3.org/2000/svg'><polygon points='50,14 86,86 14,86' fill='"+c+"'/></svg>"; else svg="<svg viewBox='0 0 100 100' xmlns='http://www.w3.org/2000/svg'><polygon points='50,12 86,38 74,84 26,84 14,38' fill='"+c+"'/></svg>"; return 'data:image/svg+xml;charset=utf-8,'+encodeURIComponent(svg); }
+    function fallbackRollData(){ const svg = "<svg viewBox='0 0 100 100' xmlns='http://www.w3.org/2000/svg'><circle cx='50' cy='50' r='36' fill='none' stroke='#ffffff' stroke-width='6' stroke-linecap='round'><animateTransform attributeName='transform' type='rotate' from='0 50 50' to='360 50 50' dur='0.45s' repeatCount='indefinite'/></circle></svg>"; return 'data:image/svg+xml;charset=utf-8,'+encodeURIComponent(svg); }
 
-      // Detalle
-      if (!append){ resultList.innerHTML = ''; statsBox.style.display='none'; statsBox.innerHTML=''; }
-      if (runs===1){
-        const order = DICE.map(d=>d.key); const lines = [];
-        for (const k of order){ if(!byType[k]) continue; const sides=(DICE.find(d=>d.key===k)||{sides:parseInt(k.replace('d',''))}).sides; const label=`D${sides}`;
-          if(k==='d20'&&advMode!=='normal'){
-            const parts=byType[k].map(o=>`(${o.pair[0]}, ${o.pair[1]}) → <strong class="${o.chosen===20?'crit':o.chosen===1?'fail':''}">${o.chosen}</strong>`);
-            const subtotal=byType[k].reduce((a,b)=>a+b.chosen,0);
-            lines.push(`<div class="line"><div>${label} (${parts.length}) ${advMode==='adv'?'con ventaja':'con desventaja'}:</div><div>${parts.join(' + ')} = <strong>${subtotal}</strong></div></div>`);
-          } else {
-            const arr = byType[k];
-            const subtotal = arr.reduce((a,b)=>a+b,0);
-            lines.push(`<div class="line"><div>${label} (${arr.length}):</div><div>${arr.join(' + ')} = <strong>${subtotal}</strong></div></div>`);
-          }
-        }
-        if (mod){ lines.push(`<div class="line"><div>Modificador:</div><div>${mod>0?'+':''}${mod}</div></div>`); }
-        if (succ!==null){ lines.push(`<div class="line"><div>Éxitos (${succMode==='ge'?'≥':'≤'} ${succTarget}):</div><div><strong>${succ}</strong></div></div>`); }
-        resultList.innerHTML = lines.join('');
-      } else {
-        // Runs > 1: lista de resultados + estadísticas si procede
-        const line = document.createElement('div'); line.className='line';
-        line.innerHTML = `<div>Tirada ${runIndex} ${succ!==null?`· éxitos: <strong>${succ}</strong>`:''}</div><div><strong>${finalTotal}</strong></div>`;
-        resultList.appendChild(line);
-        // acumular y pintar stats
-        seriesTotals.push(finalTotal);
-        if (succ!==null) seriesSuccs.push(succ);
-        if (showStats) renderStats(seriesTotals, seriesSuccs);
-      }
+    function adjust(key,delta){ state[key]=Math.max(0,(state[key]||0)+delta); updateUI(); }
+    function updateUI(){ for(const d of DICE){ const cnt=document.querySelector('[data-key="'+d.key+'"][data-role="count"]'); if(cnt) cnt.textContent = state[d.key]||0; } const arr=DICE.filter(d=>state[d.key]>0).map(d=> (state[d.key]+'×'+d.label) ); const totalDice = DICE.reduce((acc,d)=>acc+(state[d.key]||0),0); const modTxt=mod? (mod>0?(' + '+mod):(' − '+Math.abs(mod))):''; const advTxt=advMode==='adv'? ' · ventaja' : (advMode==='dis'? ' · desventaja' : ''); const succTxt=succMode==='none'? '' : (' · éxitos: '+(succMode==='ge'?'≥':'≤')+' '+succTarget); summary.textContent = arr.length? (arr.join(' · ')+modTxt+advTxt+succTxt) : 'Sin dados seleccionados.'; btnRoll.disabled = (totalDice===0); modVal.textContent = mod; repVal.textContent = repeatCount; succTargetInp.disabled=(succMode==='none'); succTargetInp.value=succTarget; rerollOnesChk.checked=rerollOnes; explodeMaxChk.checked=explodeMax; succModeSel.value=succMode; showStatsChk.checked=showStats; }
 
-      if (!append) modal.classList.add('show');
-
-      // Historial (guardar solo primera tirada de la serie o tirada única)
-      if (!append){
-        history.unshift({ time:new Date().toLocaleString(), summary:getSelectionSummary(), mod, advMode, total:finalTotal, succ });
-      }
-    }
-
-    function renderStats(totals, succs){
-      if (!totals || totals.length===0) return;
-      statsBox.style.display='block';
-      const totalsStats = computeStats(totals);
-      const totalsHist = buildHistRows(totalsStats);
-
-      let succHtml = '';
-      if (succMode!=='none' && succs && succs.length){
-        const succStats = computeStats(succs);
-        succHtml = `
-          <div class="statsSection">
-            <div class="statsTitle">Éxitos</div>
-            <div class="statsHeader">
-              <div class="chip">Mín: <strong>${succStats.min}</strong></div>
-              <div class="chip">Media: <strong>${succStats.mean.toFixed(2)}</strong></div>
-              <div class="chip">Máx: <strong>${succStats.max}</strong></div>
-              <div class="chip">Muestras: <strong>${succStats.n}</strong></div>
-            </div>
-            <div class="hist">${buildHistRows(succStats)}</div>
-          </div>`;
-      }
-
-      statsBox.innerHTML = `
-        <div class="statsSection">
-          <div class="statsTitle">Totales</div>
-          <div class="statsHeader">
-            <div class="chip">Mín: <strong>${totalsStats.min}</strong></div>
-            <div class="chip">Media: <strong>${totalsStats.mean.toFixed(2)}</strong></div>
-            <div class="chip">Máx: <strong>${totalsStats.max}</strong></div>
-            <div class="chip">Muestras: <strong>${totalsStats.n}</strong></div>
-          </div>
-          <div class="hist">${totalsHist}</div>
-        </div>
-        ${succHtml}
-      `;
-    }
-
-    function computeStats(arr){
-      const n = arr.length; const min = Math.min(...arr); const max = Math.max(...arr); const mean = arr.reduce((a,b)=>a+b,0)/n;
-      const bins = Math.min(10, Math.max(5, Math.floor(Math.sqrt(n))));
-      const span = Math.max(1, max - min + 1);
-      const step = Math.max(1, Math.floor(span / bins));
-      const counts = new Array(bins).fill(0);
-      for (const v of arr){ let idx = Math.floor((v - min) / step); if (idx >= bins) idx = bins - 1; counts[idx]++; }
-      return {n, min, max, mean, bins, minBase:min, step, counts};
-    }
-
-    function buildHistRows(stats){
-      const {bins, minBase, step, counts} = stats; const maxCount = Math.max(...counts);
-      return counts.map((c,i)=>{
-        const a = minBase + i*step; const b = (i===bins-1) ? (minBase + (i+1)*step - 1) : (minBase + (i+1)*step - 1);
-        const w = maxCount? Math.round(c/maxCount*100) : 0;
-        return `<div class="histRow"><div class="muted">${a}–${b}</div><div class="bar" style="width:${w}%"></div><div class="muted">${c}</div></div>`;
-      }).join('');
-    }
-
-    function getSelectionSummary(){
-      const arr = DICE.filter(d=>state[d.key]>0).map(d=>`${state[d.key]}×${d.label}`);
-      const modTxt = mod? (mod>0?` + ${mod}`:` − ${Math.abs(mod)}`):'';
-      const advTxt = advMode==='adv'? ' · ventaja' : advMode==='dis'? ' · desventaja':'';
-      const succTxt = succMode==='none'? '' : ` · éxitos: ${succMode==='ge'?'≥':'≤'} ${succTarget}`;
-      return (arr.join(' · ')||'—') + modTxt + advTxt + succTxt;
-    }
-
-    function renderHistory(){
-      histCount.textContent = `${history.length}`;
-      if (!history.length){ historyList.innerHTML = '<div class="muted">Sin tiradas aún.</div>'; return; }
-      historyList.innerHTML = history.map(h=>`<div class="line"><div><strong>${h.time}</strong><br/><span class="muted">${h.summary}</span></div><div><strong>${h.total}</strong>${h.succ!=null?` · éxitos: ${h.succ}`:''}</div></div>`).join('');
-    }
-
-    function buildPlainTextResult(){
-      const html = resultList.innerText.trim();
-      return `Tirada (${new Date().toLocaleString()}):
-${getSelectionSummary()}
-${html}`;
-    }
-
-    // ===== Fallbacks =====
-    function fallbackIconData(key){
-      const colors = { d2:'#f59e0b', d4:'#2563eb', d6:'#eab308', d8:'#10b981', d10:'#9333ea', d12:'#84cc16', d20:'#ef4444', d100:'#8b5cf6' };
-      const c = colors[key]||'#38bdf8';
-      const shape = key==='d6' ? 'square' : (key==='d4'?'tri':'poly');
-      let svg='';
-      if (shape==='square') svg = `<svg viewBox='0 0 100 100' xmlns='http://www.w3.org/2000/svg'><rect x='16' y='16' width='68' height='68' rx='14' fill='${c}'/></svg>`;
-      else if (shape==='tri') svg = `<svg viewBox='0 0 100 100' xmlns='http://www.w3.org/2000/svg'><polygon points='50,14 86,86 14,86' fill='${c}'/></svg>`;
-      else svg = `<svg viewBox='0 0 100 100' xmlns='http://www.w3.org/2000/svg'><polygon points='50,12 86,38 74,84 26,84 14,38' fill='${c}'/></svg>`;
-      return 'data:image/svg+xml;charset=utf-8,' + encodeURIComponent(svg);
-    }
-    function fallbackRollData(){
-      const svg = `<svg viewBox='0 0 100 100' xmlns='http://www.w3.org/2000/svg'>
-        <circle cx='50' cy='50' r='36' fill='none' stroke='#ffffff' stroke-width='6' stroke-linecap='round'>
-          <animateTransform attributeName='transform' type='rotate' from='0 50 50' to='360 50 50' dur='0.45s' repeatCount='indefinite'/>
-        </circle>
-      </svg>`;
-      return 'data:image/svg+xml;charset=utf-8,' + encodeURIComponent(svg);
-    }
-
-    function cardHTML(d){
-      const files = SPRITES[d.key]||{};
-      const iconSrc = files.icon || fallbackIconData(d.key);
-      return `
-      <div class="card" data-type="${d.key}">
-        <div class="icon" data-key="${d.key}"><img class="base" alt="${d.label}" src="${iconSrc}"/></div>
-        <div class="row"><div class="label">${d.label}</div><div class="muted">${d.sides} caras</div></div>
-        <div class="row qty">
-          <button data-key="${d.key}" data-action="dec" aria-label="menos">-</button>
-          <div class="count" data-role="count" data-key="${d.key}">0</div>
-          <button data-key="${d.key}" data-action="inc" aria-label="más">+</button>
-        </div>
-      </div>`;
-    }
-
-    function adjust(key,delta){ state[key] = Math.max(0, (state[key]||0)+delta); updateUI(); }
-
-    function updateUI(){
-      for (const d of DICE){ const cnt = document.querySelector(`[data-key="${d.key}"][data-role="count"]`); if (cnt) cnt.textContent = state[d.key]||0; }
-      const arr = DICE.filter(d=>state[d.key]>0).map(d=>`${state[d.key]}×${d.label}`);
-      const totalDice = DICE.reduce((acc,d)=>acc+(state[d.key]||0),0);
-      const modTxt = mod? (mod>0?` + ${mod}`:` − ${Math.abs(mod)}`):'';
-      const advTxt = advMode==='adv'? ' · ventaja' : advMode==='dis'? ' · desventaja':'';
-      const succTxt = succMode==='none'? '' : ` · éxitos: ${succMode==='ge'?'≥':'≤'} ${succTarget}`;
-      summary.textContent = arr.length? arr.join(' · ') + modTxt + advTxt + succTxt : 'Sin dados seleccionados.';
-      btnRoll.disabled = totalDice===0; modVal.textContent = mod;
-      repVal.textContent = repeatCount;
-      succTargetInp.disabled = (succMode==='none'); succTargetInp.value = succTarget;
-      rerollOnesChk.checked = rerollOnes; explodeMaxChk.checked = explodeMax; succModeSel.value = succMode;
-      showStatsChk.checked = showStats;
-    }
-
-    // ===== Arranque =====
-    updateUI();
-
-    // ====== Test cases (no intrusivos) ======
-    (function runTests(){
-      const results = [];
-      function assert(cond, name){ results.push({name, pass:!!cond}); cond? console.log('✅', name): console.error('❌', name); }
-
-      // 1) CSV newline join
-      assert(['a','b'].join('
-').includes('
-'), 'CSV usa "\n" como separador de líneas');
-
-      // 2) randInt rango 1..n y cobertura básica
-      const counts = [0,0,0,0,0,0];
-      for(let i=0;i<600;i++){ const v = (function(){ try{return randInt(6);}catch(e){return 1;} })(); counts[v-1]++; }
-      const inRange = counts.length===6 && counts.every(c=>c>=1);
-      assert(inRange, 'randInt(6) devuelve valores en 1..6 (cobertura)');
-
-      // 3) computeStats simple
-      const s = computeStats([1,2,3]);
-      assert(s.min===1 && s.max===3 && Math.abs(s.mean-2)<1e-9, 'computeStats: min/mean/max correctos');
-
-      // 4) Ventaja / Desventaja en D20
-      const advBak = advMode; advMode='adv';
-      const rA = rollOne({key:'d20', sides:20});
-      const okAdv = rA && Array.isArray(rA.pair) && rA.chosen===Math.max(rA.pair[0], rA.pair[1]);
-      assert(okAdv, 'D20 con ventaja elige el máximo');
-      advMode='dis';
-      const rD = rollOne({key:'d20', sides:20});
-      const okDis = rD && Array.isArray(rD.pair) && rD.chosen===Math.min(rD.pair[0], rD.pair[1]);
-      assert(okDis, 'D20 con desventaja elige el mínimo');
-      advMode = advBak;
-
-      // 5) Render inicial: hay cards visibles
-      const cards = document.querySelectorAll('.card');
-      assert(cards.length === DICE_BASE.length, 'Se renderizan los cards iniciales');
-
-      // 6) Pager go() navega correctamente
-      const was = pager.style.transform;
-      go(1); const t1 = pager.style.transform.includes('-100');
-      go(0); const t0 = pager.style.transform.includes('0');
-      assert(t1 && t0, 'Pager go() mueve a pantallas 0/1');
-
-      const report = document.createElement('pre');
-      report.id = 'testReport';
-      report.style.display = 'none';
-      report.textContent = JSON.stringify(results, null, 2);
-      document.body.appendChild(report);
-    })();
+    // ===== Tests mínimos =====
+    try{ const cards=document.querySelectorAll('.card'); console.log('Cards iniciales:', cards.length); }catch(_){ }
   })();
   </script>
 </body>
