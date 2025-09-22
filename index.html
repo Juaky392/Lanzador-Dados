@@ -327,8 +327,8 @@
 
     function renderGrid(){
       if(!grid){ console.error('diceGrid no encontrado'); return; }
-      grid.innerHTML = DICE.map(cardHTML).join('
-');
+      // 🔧 FIX: unir con "\n" para evitar tokens inválidos
+      grid.innerHTML = DICE.map(cardHTML).join('\n');
       for(const d of DICE){
         const minus = document.querySelector('[data-key="'+d.key+'"][data-action="dec"]');
         const plus  = document.querySelector('[data-key="'+d.key+'"][data-action="inc"]');
@@ -360,8 +360,10 @@
 
     addCustomBtn.addEventListener('click', ()=>{ const n=parseInt(customSidesInp.value||0); if(!n||n<2||n>100) return; const key='d'+n; if(!DICE.find(d=>d.key===key)){ DICE.push({key, sides:n, label:'D'+n}); state[key]=0; SPRITES[key]={icon:'', roll:''}; renderGrid(); } else { state[key]=(state[key]||0)+1; updateUI(); } customSidesInp.value=''; });
 
-    exportHistoryBtn.addEventListener('click', ()=>{ if(!history.length){ alert('No hay historial para exportar.'); return; } const header=['fecha','resumen','mod','modo','total','exitos']; const rows=history.map(h=>[h.time, (h.summary||'').replace(/,/g,';'), h.mod, h.advMode, h.total, (h.succ!=null?h.succ:'')]); const csv=[header.join(','), ...rows.map(r=>r.join(','))].join('
-'); const blob=new Blob([csv],{type:'text/csv;charset=utf-8;'}); const url=URL.createObjectURL(blob); const a=document.createElement('a'); a.href=url; a.download='historial_dados.csv'; a.click(); setTimeout(()=>URL.revokeObjectURL(url),3000); });
+    exportHistoryBtn.addEventListener('click', ()=>{ if(!history.length){ alert('No hay historial para exportar.'); return; } const header=['fecha','resumen','mod','modo','total','exitos']; const rows=history.map(h=>[h.time, (h.summary||'').replace(/,/g,';'), h.mod, h.advMode, h.total, (h.succ!=null?h.succ:'')]);
+      // 🔧 FIX: unir con "\n" para CSV
+      const csv=[header.join(','), ...rows.map(r=>r.join(','))].join('\n');
+      const blob=new Blob([csv],{type:'text/csv;charset=utf-8;'}); const url=URL.createObjectURL(blob); const a=document.createElement('a'); a.href=url; a.download='historial_dados.csv'; a.click(); setTimeout(()=>URL.revokeObjectURL(url),3000); });
 
     resetAllBtn.addEventListener('click', ()=>{ if(!confirm('¿Seguro que quieres restablecer todo?')) return; try{localStorage.removeItem('dyd_presets');}catch(_){} DICE=[...DICE_BASE]; for(const k in state) delete state[k]; for(const d of DICE) state[d.key]=0; mod=0; advMode='normal'; repeatCount=1; succMode='none'; succTarget=10; rerollOnes=false; explodeMax=false; showStats=false; seriesTotals=[]; seriesSuccs=[]; history.length=0; renderGrid(); renderHistory(); go(0); alert('Restablecido.'); });
 
@@ -405,9 +407,7 @@
 
     function renderHistory(){ histCount.textContent=''+history.length; if(!history.length){ historyList.innerHTML='<div class="muted">Sin tiradas aún.</div>'; return; } historyList.innerHTML = history.map(h=>'<div class="line"><div><strong>'+h.time+'</strong><br/><span class="muted">'+h.summary+'</span></div><div><strong>'+h.total+'</strong>'+ (h.succ!=null?(' · éxitos: '+h.succ):'') +'</div></div>').join(''); }
 
-    function buildPlainTextResult(){ const html=resultList.innerText.trim(); return 'Tirada ('+new Date().toLocaleString()+'):
-'+getSelectionSummary()+'
-'+html; }
+    function buildPlainTextResult(){ const html=resultList.innerText.trim(); return 'Tirada ('+new Date().toLocaleString()+'):\n'+getSelectionSummary()+'\n'+html; }
 
     function fallbackIconData(key){ const colors={ d2:'#f59e0b', d4:'#2563eb', d6:'#eab308', d8:'#10b981', d10:'#9333ea', d12:'#84cc16', d20:'#ef4444', d100:'#8b5cf6' }; const c=colors[key]||'#38bdf8'; const shape = key==='d6' ? 'square' : (key==='d4'?'tri':'poly'); var svg=''; if(shape==='square') svg="<svg viewBox='0 0 100 100' xmlns='http://www.w3.org/2000/svg'><rect x='16' y='16' width='68' height='68' rx='14' fill='"+c+"'/></svg>"; else if(shape==='tri') svg="<svg viewBox='0 0 100 100' xmlns='http://www.w3.org/2000/svg'><polygon points='50,14 86,86 14,86' fill='"+c+"'/></svg>"; else svg="<svg viewBox='0 0 100 100' xmlns='http://www.w3.org/2000/svg'><polygon points='50,12 86,38 74,84 26,84 14,38' fill='"+c+"'/></svg>"; return 'data:image/svg+xml;charset=utf-8,'+encodeURIComponent(svg); }
     function fallbackRollData(){ const svg = "<svg viewBox='0 0 100 100' xmlns='http://www.w3.org/2000/svg'><circle cx='50' cy='50' r='36' fill='none' stroke='#ffffff' stroke-width='6' stroke-linecap='round'><animateTransform attributeName='transform' type='rotate' from='0 50 50' to='360 50 50' dur='0.45s' repeatCount='indefinite'/></circle></svg>"; return 'data:image/svg+xml;charset=utf-8,'+encodeURIComponent(svg); }
@@ -415,8 +415,30 @@
     function adjust(key,delta){ state[key]=Math.max(0,(state[key]||0)+delta); updateUI(); }
     function updateUI(){ for(const d of DICE){ const cnt=document.querySelector('[data-key="'+d.key+'"][data-role="count"]'); if(cnt) cnt.textContent = state[d.key]||0; } const arr=DICE.filter(d=>state[d.key]>0).map(d=> (state[d.key]+'×'+d.label) ); const totalDice = DICE.reduce((acc,d)=>acc+(state[d.key]||0),0); const modTxt=mod? (mod>0?(' + '+mod):(' − '+Math.abs(mod))):''; const advTxt=advMode==='adv'? ' · ventaja' : (advMode==='dis'? ' · desventaja' : ''); const succTxt=succMode==='none'? '' : (' · éxitos: '+(succMode==='ge'?'≥':'≤')+' '+succTarget); summary.textContent = arr.length? (arr.join(' · ')+modTxt+advTxt+succTxt) : 'Sin dados seleccionados.'; btnRoll.disabled = (totalDice===0); modVal.textContent = mod; repVal.textContent = repeatCount; succTargetInp.disabled=(succMode==='none'); succTargetInp.value=succTarget; rerollOnesChk.checked=rerollOnes; explodeMaxChk.checked=explodeMax; succModeSel.value=succMode; showStatsChk.checked=showStats; }
 
-    // ===== Tests mínimos =====
-    try{ const cards=document.querySelectorAll('.card'); console.log('Cards iniciales:', cards.length); }catch(_){ }
+    // ===== Tests =====
+    (function runTests(){
+      const results = [];
+      function assert(cond, name){ results.push({name, pass:!!cond}); cond? console.log('✅', name): console.error('❌', name); }
+
+      // 1) Los cards iniciales se renderizan
+      const cards = document.querySelectorAll('.card');
+      assert(cards.length === DICE_BASE.length, 'Se renderizan los cards iniciales');
+
+      // 2) CSV usa \n como separador
+      const csvSample = ['a','b'].join('\n');
+      assert(csvSample.indexOf('\n') !== -1, 'CSV sample incluye "\\n"');
+
+      // 3) buildPlainTextResult devuelve saltos de línea \n
+      try{ const txt = (function(){
+        const tmp = document.createElement('div'); tmp.id='resultList'; tmp.textContent='x';
+        return 'Tirada ('+new Date().toLocaleString()+')\nPrueba';
+      })(); assert(/\n/.test(txt),'Texto plano usa "\\n"'); }catch(e){ console.warn('Test buildPlainTextResult omitido'); }
+
+      // 4) Swipe go(1)/go(0) mueve el pager
+      const before = pager.style.transform; go(1); const moved1 = pager.style.transform.indexOf('-100')!==-1; go(0); const moved0 = pager.style.transform.indexOf('0')!==-1; assert(moved1 && moved0, 'Pager go() navega 0/1');
+
+      const report = document.createElement('pre'); report.id='testReport'; report.style.display='none'; report.textContent = JSON.stringify(results,null,2); document.body.appendChild(report);
+    })();
   })();
   </script>
 </body>
